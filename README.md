@@ -16,10 +16,12 @@ an arithmetic operation and another literal or variable.
 
 The complete grammer is below:
 
+```
 Statement := AssignmentStatement | FunctionStatement
 FunctionStatement := functionName (args)(0 or more)
 AssignmentStatement := VariableOrLiteral (Operation VariableOrLiteral)(0 or 1)
 Operation := + | - | * | /
 VariableOrLiteral := variableName | [0-9]+ 
+```
 
            

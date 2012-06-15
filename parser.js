@@ -11,6 +11,55 @@ var FunctionNode = ASTNode.extend({
   init: function(name, arguments) {
     this.name = name;
     this.arguments = arguments;
+  },
+
+  class_name: "FunctionNode",
+
+  operation: function(vm) {
+    function_node = this;
+    return new Operation(
+      function(vm) {
+        this.old_stack_frame_position = vm.current_stack_frame_position
+      },
+      function(vm) {
+        vm.create_new_stack_frame(function_node);
+      },
+      function(vm) {
+        vm.restore_stack_frame(this.old_stack_frame_position);
+      }
+    )
+  },
+
+  generate_operations: function(vm) {
+console.log("in function generate operations");
+    var primitive = vm.primitives[this.name];
+    if (primitive) 
+      return primitive.operation(vm);
+    else
+      return this.operation(vm)
+  }
+});
+
+
+var OutputPrimitiveNode = FunctionNode.extend({
+  class_name: "OutputPrimitiveNode",
+
+  operation: function(vm) {
+    output_primitive_node = this;
+    return new Operation(
+      function(vm) {
+        this.output_length = vm.output.length();
+      },
+      function(vm) {
+        var i;
+        for (i = 0; i < this.arguments.length; i++) {
+          this.output.push(this.arguments[i].evaluate());
+        }
+      },
+      function(vm) {
+        vm.output.set_length(this.output_length)
+      }
+    );  
   }
 });
 
@@ -18,7 +67,31 @@ var AssignmentNode = ASTNode.extend({
   init: function(lhs, rhs) {
     this.lhs = lhs;
     this.rhs = rhs;
+  },
+
+  class_name: "AssignmentNode",
+
+  operation: function(vm) {
+    assignment_node = this;
+    return new Operation(
+      function(vm) {
+        this.old_value = vm.memory.get(this.lhs)
+      },
+      function(vm) {
+        vm.memory.set(assignment_node.lhs, assignment_node.rhs.evaluate());
+        vm.set_current_statement_index(vm.current_statement_index + 1);
+      },
+      function(vm) {
+        vm.memory.set(assignment_node.lhs, this.old_value);
+      }
+    )
+  },
+
+  generate_operations: function(vm) {
+console.log("in assignment generate operations");
+    return this.operation(vm);
   }
+
 });
 
 var ExpressionNode = ASTNode.extend({
@@ -26,21 +99,138 @@ var ExpressionNode = ASTNode.extend({
     this.lhs = lhs;
     this.operation = operation;
     this.rhs = rhs;
+  },
+
+  class_name: "ExpressionNode",
+
+  evaluate: function(vm) {
+    return eval(this.lhs + " " + this.operation + " " + this.rhs);
   }
 });
 
 var LiteralNode = ASTNode.extend({
   init: function(value) {
     this.value = value;
+  },
+
+  class_name: "LiteralNode",
+  
+  evaluate: function(vm) {
+    return this.value;
   }
 });
 
 var VariableNode = ASTNode.extend({
   init: function(name) {
     this.name = name;
+  },
+
+  class_name: "VariableNode",
+
+  evaluate: function(vm) {
+    vm.memory[this.name];
   }
 });
 
+
+// -------------------- VM classes ------------------------
+
+var Memory = Class.extend({
+  init: function() {
+    this.entries = {};
+  },
+
+  class_name: "Memory",
+
+  get: function(name) {
+    this.entries[name]
+  },
+
+  set: function(name, value) {
+    // TODO: update view
+    this.entries[name] = value;
+  }
+});
+
+var Operation = Class.extend({
+  init: function(capture_function, do_statement, undo_statement) {
+    this.capture_function = capture_function;
+    this.do_statement = do_statement;
+    this.undo_statement = undo_statement;
+  },
+
+  capture_current_state: function(vm) {
+    this.saved_current_statement_index = vm.current_statement_index;
+    this.capture_function(vm);
+  },
+
+  do: function(vm) {
+    this.do_statement(vm);
+  },
+
+  undo: function(vm) {
+    this.undo_statement(vm);
+    vm.set_current_statement_index(this.saved_current_statement_index);
+  }
+});
+
+var Output = Class.extend({
+  init: function() {
+    this.lines = [];
+  },
+
+  class_name: "Output",
+
+  push: function(line) {
+    // TODO: update output view
+    this.lines.push(lines);
+  },
+  
+  length: function() {
+    return this.lines.length;
+  },
+
+  set_length: function(length) {
+    // TODO: update the output view
+    this.lines.slice(0, length);
+  }
+})
+
+var VirtualMachine = Class.extend({
+  init: function(statements) {
+    this.memory = new Memory;
+    this.output = new Output;
+    this.primitives = {
+      output: new OutputPrimitiveNode(this)
+    };
+    this.statements = statements;
+    this.current_statement_index = 0;
+    this.undo_stack = [];
+  },
+
+  class_name: "VirtualMachine",
+
+  step: function() {
+    var current_statement = this.statements[this.current_statement_index];
+    var operation = current_statement.generate_operations(this)
+
+    operation.capture_current_state(this);
+    operation.do(this)
+    this.undo_stack.push(operation);
+  },
+
+  unstep: function() {
+    if (this.undo_stack.length > 0)
+      this.undo_stack.pop().undo(this);
+  },
+
+  set_current_statement_index: function(new_index) {
+    // TODO: update on screen instruction pointer
+    this.current_statement_index = new_index;
+  }
+});
+
+// -------------------- Parser classes ------------------------
 
 var Parser = Class.extend({
   init: function(string) {
@@ -112,6 +302,7 @@ var Parser = Class.extend({
     var op = this.tokenizer.next_token();
     console.log("expression: expr1 = <" + expr1 + ">, op = <" + op + ">");
     if (op == "\n") {
+      var op = this.tokenizer.unnext_token();
       return expr1;
     }
     else if (op == "-" || op == "+" || op == "*" || op == "/") {

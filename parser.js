@@ -254,6 +254,9 @@ var VirtualMachine = Class.extend({
   class_name: "VirtualMachine",
 
   step: function() {
+    if (this.current_statement_index == this.statements.length)
+      return;
+
     var current_statement = this.statements[this.current_statement_index];
     var operation = current_statement.generate_operations(this)
 

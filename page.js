@@ -4,7 +4,7 @@ var OutputUI = Class.extend({
   },
 
   new_line: function(new_line_index, line) {
-    $(this.pw.selector("output-table")).append("<tr><td id=\"" + this.pw.prefix + "-output-" + new_line_index + "\">" + line + "</td></tr>");
+    $(this.pw.selector("output-table")).append("<tr><td id=\"" + this.pw.prefix + "-output-" + new_line_index + "\" class=\"output-cell\">" + line + "</td></tr>");
   },
   
   remove_line: function(index) {
@@ -30,7 +30,7 @@ var MemoryUI = Class.extend({
   },
 
   dom_row: function(name, value, old_value) {
-    return "<tr id=\"" + this.pw.prefix + "-memory-" + name + "\"><td>" + name + "</td><td>" + value + "</td><td>" + old_value + "</td></tr>"
+    return "<tr id=\"" + this.pw.prefix + "-memory-" + name + "\"><td class=\"memory-cell\">" + name + "</td><td class=\"memory-cell\">" + value + "</td><td class=\"memory-cell\">" + old_value + "</td></tr>"
   }
 });
 
@@ -74,6 +74,7 @@ var ProgrammingWidget = Class.extend({
     $(self.selector("edit")).click(function() {
       $(self.selector("editor-section")).show();
       $(self.selector("program-section")).hide();
+      $(self.selector("edit-button")).hide();
       return false;
     });
   },
@@ -99,12 +100,12 @@ var ProgrammingWidget = Class.extend({
         rows = "";
         program_lines = source.split("\n");
         for (i = 0; i < self.parser.statements.length; i++) {
-          rows = rows + "<tr><td><span id=\"" + self.prefix + "-ip-" + i + "\">cur</span></td><td id=\"statement-" + i + "\">" + program_lines[i] + "</td></tr>";
+          rows = rows + "<tr><td><span id=\"" + self.prefix + "-ip-" + i + "\">--&gt;</span></td><td id=\"statement-" + i + "\">" + program_lines[i] + "</td></tr>";
         }
         console.log("rows = " + rows);
 
         $(self.selector("program-table")).html(rows);
-        $(self.selector("memory-table")).html("<tr><td>Name</td><td>Value</td><td>Old Value</td></tr>");
+        $(self.selector("memory-table")).html("<tr><td class=\"memory-header-cell\">Name</td><td class=\"memory-header-cell\">Value</td><td class=\"memory-header-cell\">Old Value</td></tr>");
         $(self.selector("output-table")).html("");
 
         $(self.selector("editor-section")).hide();
@@ -137,19 +138,23 @@ var ProgrammingWidget = Class.extend({
   insert_html: function(selector, prefix) {
     var html = 
     '<div class="programming-widget">' + 
-      '<div id="prefix-program">' + 
+      '<div id="prefix-program" class="program">' + 
         '<p>Program' + 
-          '<div id="prefix-edit-button">&nbsp;(<a href="#" id="prefix-edit">edit</a>)</div>' +
+          '<span id="prefix-edit-button">&nbsp;<a href="#" id="prefix-edit" class="button">edit</a></span>' +
         '</p>' + 
         '<div id="prefix-editor-section" class="editor-section">' + 
           '<textarea id="prefix-editor-textarea" class="editor"></textarea>' + 
-          '<a href="#" id="prefix-run" class="button">run</a>' + 
+          '<div class="actions">' + 
+            '<a href="#" id="prefix-run" class="button">run</a>' + 
+          '</div>' + 
           '<p id="error"></p>' + 
         '</div>' +
         '<div id="prefix-program-section">' + 
-          '<table id="prefix-program-table"></table>' + 
-          '<a href="#" id="prefix-backward" class="button">backward</a>' +
-          '<a href="#" id="prefix-forward" class="button">forward</a>' +
+          '<table id="prefix-program-table" class="program-table"></table>' + 
+          '<div class="actions">' + 
+            '<a href="#" id="prefix-backward" class="button">backward</a>' +
+            '<a href="#" id="prefix-forward" class="button">forward</a>' +
+          '</div>' + 
         '</div>' +
       '</div>' + 
       '<div class="memory">' +
@@ -169,5 +174,6 @@ var ProgrammingWidget = Class.extend({
 
 $(function() {
   new ProgrammingWidget("#assignment", "assignment").activate();
+  new ProgrammingWidget("#input", "input").activate();
 });
 

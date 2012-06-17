@@ -6,6 +6,7 @@
 .program {
   float: left;
   height: 250px;
+  width: 250px;
   background-color: rgb(160, 202, 238);
   padding: 10px;
   margin: 10px;
@@ -22,6 +23,22 @@
   border-radius: 5px;
 }
 
+.memory-table {
+  background-color: rgb(149, 91, 61);
+  width: 100%;
+}
+
+.memory-header-cell {
+  background-color: rgb(249, 191, 161);
+  color: rgb(255,255,255);
+  font-weight: bold;
+}
+
+.memory-cell {
+  background-color: rgb(249, 191, 161);
+  color: rgb(255,255,255);
+}
+
 .output {
   float: left;
   height: 250px;
@@ -32,9 +49,32 @@
   border-radius: 5px;
 }
 
+.output-table {
+  background-color: rgb(47, 141, 34);
+  width: 100%;
+}
+
+.output-table-cell {
+  background-color: rgb(147, 241, 134);
+  color: rgb(255,255,255);
+}
+
+
 .button {
+  margin: 5px;
   padding: 5px;
   border-radius: 2px;
+  background-color: rgb(116, 132, 137);
+}
+
+a.button {
+  color: rgb(255,255,255);
+}
+
+.program-table {
+  width: 100%;
+  margin-bottom: 15px;
+  background-color: rgb(226, 242, 247);
 }
 
 textarea {

@@ -1,0 +1,47 @@
+
+.programming-widget {
+  background-color: rgb(226, 242, 247);
+}
+
+.program {
+  float: left;
+  height: 250px;
+  background-color: rgb(160, 202, 238);
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.memory {
+  float: left;
+  height: 250px;
+  width: 200px;
+  background-color: rgb(249, 191, 161);
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.output {
+  float: left;
+  height: 250px;
+  width: 200px;
+  background-color: rgb(147, 241, 134);
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.button {
+  padding: 5px;
+  border-radius: 2px;
+}
+
+textarea {
+  width: 250px;
+  height: 150px;
+}
+
+body {
+  background-color: rgb(216, 232, 237);
+}

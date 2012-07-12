@@ -28,20 +28,55 @@ var Parser = Class.extend({
       return new EmptyStatementNode();
     }
 
-    var next = this.tokenizer.next_token();
-    console.log("statement: next = <" + next + ">");
-    if (next == "=") {
-      return this.assignment_statement(lhs);
-    }
-    else {
-      var args = []
-      while (next != "\n") {
-        this.tokenizer.unnext_token();
-        args.push(this.expression());
-        next = this.tokenizer.next_token();
-      }
+    else if (lhs == "if" || lhs == "elsif") {
+      var expr = this.expression();
+      var next = this.tokenizer.next_token();
 
-      return new FunctionNode(lhs, args);
+      if (next != "\n")
+        throw("extra token <" + next + "> after if expression");
+    
+      return IfStatementNode(lhs, expr);
+    }
+
+    else if (lhs == "else") {
+      var next = this.tokenizer.next_token();
+     
+      if (next != "\n")
+        throw("else not alone on line"); 
+    }
+
+    else if (lhs == "while") {
+      var expr = this.expression();
+      var next = this.tokenizer.next_token();
+
+      if (next != "\n")
+        throw("extra token <" + next + ">  after while expression");
+    }
+
+    else if (lhs == "end") {
+      var next = this.tokenizer.next_token();
+     
+      if (next != "\n")
+        throw("end not alone on line"); 
+    }
+
+    else {
+
+      var next = this.tokenizer.next_token();
+      console.log("statement: next = <" + next + ">");
+      if (next == "=") {
+        return this.assignment_statement(lhs);
+      }
+      else {
+        var args = []
+        while (next != "\n") {
+          this.tokenizer.unnext_token();
+          args.push(this.expression());
+          next = this.tokenizer.next_token();
+        }
+
+        return new FunctionNode(lhs, args);
+      }
     }
   },
 
@@ -69,9 +104,25 @@ var Parser = Class.extend({
     var expr1 = this.variable_or_literal(this.tokenizer.next_token());
     var op = this.tokenizer.next_token();
     console.log("expression: expr1 = <" + expr1 + ">, op = <" + op + ">");
-    if (op == "\n") {
+    if (op == "\n" || op == ")") {
       var op = this.tokenizer.unnext_token();
       return expr1;
+    }
+    else if (op == "(") {
+
+      var args = []
+      var next = this.tokenizer.next_token();
+      while (next != ")" && next != "\n") {
+        this.tokenizer.unnext_token();
+        args.push(this.expression());
+        next = this.tokenizer.next_token();
+      }
+
+      if (next == "\n") {
+        throw("function missing closing ')'");
+      }
+
+      return new FunctionNode(expr1.name, args);
     }
     else if (op == "-" || op == "+" || op == "*" || op == "/") {
       var expr2 = this.variable_or_literal(this.tokenizer.next_token());
@@ -87,7 +138,8 @@ var Parser = Class.extend({
       throw("end of line received when expecting variable or literal");
     }
 
-    if (/^[0-9]/.exec(string)) {
+    // if starts with a number or ", then its a literal
+    if (/^[0-9"]/.exec(string)) {
       return this.literal(string);
     }
     else {
@@ -101,7 +153,10 @@ var Parser = Class.extend({
 
   literal: function(string) {
     if (/^[0-9]+$/.exec(string)) {
-      return new LiteralNode(string);
+      return new NumberLiteralNode(string);
+    }
+    else if (m = /^"([^"]*)"$/.exec(string)) {
+      return new StringLiteralNode(m[1]);
     }
     else {
       throw("invalid literal: " + string);

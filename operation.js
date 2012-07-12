@@ -13,7 +13,7 @@ var Operation = Class.extend({
   },
 
   do: function(vm) {
-    this.do_statement(vm);
+    return this.do_statement(vm);
   },
 
   undo: function(vm) {

@@ -6,7 +6,8 @@
 .program {
   float: left;
   height: 250px;
-  width: 250px;
+  min-width: 250px;
+  width: 28.5%;
   background-color: rgb(160, 202, 238);
   padding: 10px;
   margin: 10px;
@@ -16,7 +17,8 @@
 .memory {
   float: left;
   height: 250px;
-  width: 200px;
+  min-width: 200px;
+  width: 28.5%;
   background-color: rgb(249, 191, 161);
   padding: 10px;
   margin: 10px;
@@ -30,7 +32,7 @@
 
 .memory-header-cell {
   background-color: rgb(249, 191, 161);
-  color: rgb(255,255,255);
+  color: rgb(200,255,255);
   font-weight: bold;
 }
 
@@ -42,7 +44,8 @@
 .output {
   float: left;
   height: 250px;
-  width: 200px;
+  min-width: 200px;
+  width: 28.5%;
   background-color: rgb(147, 241, 134);
   padding: 10px;
   margin: 10px;

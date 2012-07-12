@@ -1,4 +1,44 @@
 
+var Executor = Class.extend({
+  init: function(dependencies, value_function) {
+    this.dependencies = dependencies;
+    this.value_function = value_function;
+    this.resolved = false;
+    this.promised = false;
+    this.promise_satisfied = false;
+  },
+
+  available: function() {
+    return this.resolve();
+  },
+
+  resolve: function() {
+    if (!this.resolved) {
+      this.resolved = true;
+      this.resolved_value = this.value_function();
+
+      if (this.resolved_value instanceof(PromiseClass)) {
+        this.promised = true;
+        if (!this.resolved_value.satisfied())
+          return false;
+      }
+    }
+
+    if (this.promised) {
+      if (!this.promise_satisfied && this.resolved_value.satisfied()) {
+        this.promise_satisfied = true;
+        this.resolved_value = this.resolved_value.value();
+      }
+    }
+
+    return (!this.promised || this.promise_satisfied);
+  },
+
+  value: function() {
+    return this.resolved_value;
+  }
+});
+
 var Memory = Class.extend({
   init: function(memory_ui) {
     this.memory_ui = memory_ui;
@@ -59,35 +99,67 @@ var Output = Class.extend({
 })
 
 var VirtualMachine = Class.extend({
-  init: function(program_ui, memory_ui, output_ui) {
+  class_name: "VirtualMachine",
+
+  init: function(widget_ui, program_ui, memory_ui, output_ui) {
+    this.widget_ui = widget_ui;
     this.program_ui = program_ui;
     this.memory_ui = memory_ui;
     this.output_ui = output_ui;
+    this.current_dom_id_num = 1;
   },
 
   start: function(statements) {
     this.memory = new Memory(this.memory_ui);
     this.output = new Output(this.output_ui);
     this.primitives = {
+      input: new InputPrimitiveNode(this),
       output: new OutputPrimitiveNode(this)
     };
     this.statements = statements;
     this.current_statement_index = 0;
     this.undo_stack = [];
+    this.executor_stack = [];
   },
 
-  class_name: "VirtualMachine",
+  new_dom_id: function() {
+    var dom_id = "vm-dom-id-" + this.current_dom_id_num;
+    this.current_dom_id_num++;
+    return dom_id; 
+  },
+
+  enable_step: function() {
+    if (this.executor_stack.length > 0 && !this.executors_available()) 
+      return false;
+
+    return true;
+  },
 
   step: function() {
+    // if resuming unfinished statement
+    if (this.executor_stack.length > 0) {
+      if (!this.executors_available())
+        return false;
+    }
+
     if (this.current_statement_index == this.statements.length)
-      return;
+      return false;
 
     var current_statement = this.statements[this.current_statement_index];
     var operation = current_statement.generate_operations(this)
 
     operation.capture_current_state(this);
-    operation.do(this)
+    var operation_executor = operation.do(this)
     this.undo_stack.push(operation);
+
+    // order the executors from bottom to top
+    this.create_executor_stack(operation_executor);
+
+    // if some executors are not finished, return false to disable step
+    if (!this.executors_available())
+      return false;
+
+    return true;
   },
 
   unstep: function() {
@@ -95,10 +167,39 @@ var VirtualMachine = Class.extend({
       this.undo_stack.pop().undo(this);
   },
 
+  create_executor_stack: function(operation_executor) {
+    var input_executor_stack = [operation_executor];
+    while (input_executor_stack.length != 0) {
+      var executor = input_executor_stack.pop();
+      this.executor_stack.push(executor);
+      if (executor.dependencies.length > 0) {
+        for (var i = 0; i < executor.dependencies.length; i++) {
+          input_executor_stack.push(executor.dependencies[i]);
+        }
+      }
+    }
+  },
+
+  executors_available: function() {
+    // go through the executors in order and make sure all the
+    // values are avaiable
+    while (this.executor_stack.length > 0) {
+      var executor = this.executor_stack.pop();
+
+      if (!executor.available()) {
+        this.executor_stack.push(executor);
+        return false;
+      }
+    }
+
+    return true;
+  },
+
   set_current_statement_index: function(new_index) {
     old_index = this.current_statement_index;
     this.current_statement_index = new_index;
     this.program_ui.move_instruction_pointer(old_index, new_index);
-  }
+  },
+
 });
 

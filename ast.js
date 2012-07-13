@@ -98,12 +98,14 @@ var InputPrimitiveNode = FunctionNode.extend({
 
           input_primitive_node.promise = new PromiseClass();
           vm.output.push(
-            '<span>' + input_primitive_node.args[0] + '</span>' + 
+            '<span>' + input_primitive_node.args[0].value + '</span>' + 
             '<input type="text" id="' + input_id + '" />' + 
-            '<input id="' + button_id + '" type="submit" />'
+            '<input id="' + button_id + '" type="submit" value="submit" />'
           );
 
           $("#" + button_id).live("click", function() {
+            $("#" + button_id).hide();
+            $("#" + input_id).attr("disabled", "disabled");
             input_primitive_node.promise.satisfy();
             vm.widget_ui.step();
           });

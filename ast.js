@@ -107,7 +107,7 @@ var InputPrimitiveNode = FunctionNode.extend({
             $("#" + button_id).hide();
             $("#" + input_id).attr("disabled", "disabled");
             input_primitive_node.promise.satisfy();
-            vm.widget_ui.step();
+            vm.widget_ui.resume();
           });
 
           input_primitive_node.promise.set_value_function(function() {
@@ -302,13 +302,14 @@ var VariableNode = ASTNode.extend({
   class_name: "VariableNode",
 
   operation: function(vm) {
+    variable_node = this;
     return new Operation(
       function(vm) {
       },
       function(vm) {
         return new Executor([], 
           function() {
-            return vm.memory.get(this.name);
+            return vm.memory.get(variable_node.name);
           }
         );
       },

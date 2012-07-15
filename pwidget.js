@@ -108,6 +108,17 @@ var ProgrammingWidget = Class.extend({
     }
   },
 
+  resume: function() {
+    if (!this.virtual_machine.resume()) {
+      $(this.selector("forward")).hide();
+      $(this.selector("forward-disabled")).show();
+    }
+    else {
+      $(this.selector("forward")).show();
+      $(this.selector("forward-disabled")).hide();
+    }
+  },
+
   unstep: function() {
     this.virtual_machine.unstep();
   },

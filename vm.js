@@ -135,13 +135,16 @@ var VirtualMachine = Class.extend({
     return true;
   },
 
-  step: function() {
+  resume: function() {
     // if resuming unfinished statement
     if (this.executor_stack.length > 0) {
       if (!this.executors_available())
         return false;
     }
+    return true;
+  },
 
+  step: function() {
     if (this.current_statement_index == this.statements.length)
       return false;
 
@@ -155,11 +158,7 @@ var VirtualMachine = Class.extend({
     // order the executors from bottom to top
     this.create_executor_stack(operation_executor);
 
-    // if some executors are not finished, return false to disable step
-    if (!this.executors_available())
-      return false;
-
-    return true;
+    return this.resume();
   },
 
   unstep: function() {

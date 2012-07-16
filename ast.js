@@ -79,7 +79,7 @@ var WaitForPrimitiveNode = FunctionNode.extend({
 var InputPrimitiveNode = FunctionNode.extend({
   class_name: "InputPrimitiveNode",
 
-  operation: function(vm) {
+  operation: function(vm, value_class, args) {
     var input_primitive_node = this;
     return new Operation(
       function(vm) {
@@ -87,8 +87,8 @@ var InputPrimitiveNode = FunctionNode.extend({
       },
       function(vm) {
         var arg_funcs = [];
-        for (i = 0; i < input_primitive_node.args.length; i++) {
-          arg = input_primitive_node.args[i];
+        for (i = 0; i < args.length; i++) {
+          arg = args[i];
           arg_funcs.push(arg.generate_operations(vm).do(vm));
         }
 
@@ -98,7 +98,7 @@ var InputPrimitiveNode = FunctionNode.extend({
 
           input_primitive_node.promise = new PromiseClass();
           vm.output.push(
-            '<span>' + input_primitive_node.args[0].value + '</span>' + 
+            '<span>' + args[0].value + '</span>' + 
             '<input type="text" id="' + input_id + '" />' + 
             '<input id="' + button_id + '" type="submit" value="submit" />'
           );
@@ -111,7 +111,7 @@ var InputPrimitiveNode = FunctionNode.extend({
           });
 
           input_primitive_node.promise.set_value_function(function() {
-            return $("#" + input_id).val();
+            return new value_class($("#" + input_id).val());
           });
 
           //vm.set_current_statement_index(vm.current_statement_index + 1);
@@ -125,6 +125,27 @@ var InputPrimitiveNode = FunctionNode.extend({
     );  
   }
 
+});
+
+
+var InputStringPrimitiveNode = FunctionNode.extend({
+  class_name: "InputStringPrimitiveNode",
+
+  operation: function(vm) {
+    var input_string_primitive_node = this;
+    var input_primitive_node_object = new InputPrimitiveNode;
+    return input_primitive_node_object.operation(vm, StringClass, input_string_primitive_node.args);
+  }
+});
+
+var InputNumberPrimitiveNode = FunctionNode.extend({
+  class_name: "InputNumberPrimitiveNode",
+
+  operation: function(vm) {
+    var input_string_primitive_node = this;
+    var input_primitive_node_object = new InputPrimitiveNode;
+    return input_primitive_node_object.operation(vm, NumberClass, input_string_primitive_node.args);
+  }
 });
 
 var OutputPrimitiveNode = FunctionNode.extend({
@@ -147,7 +168,7 @@ var OutputPrimitiveNode = FunctionNode.extend({
           var i;
           for (i = 0; i < arg_funcs.length; i++) {
             var arg = arg_funcs[i].value();
-            vm.output.push(arg);
+            vm.output.push(String(arg.value()));
           }
           vm.set_current_statement_index(vm.current_statement_index + 1);
         });
@@ -259,7 +280,7 @@ var NumberLiteralNode = ASTNode.extend({
       function(vm) {
         return new Executor([], 
           function() {
-            return number_literal_node.value
+            return new NumberClass(number_literal_node.value);
           }
         );
       },
@@ -284,7 +305,7 @@ var StringLiteralNode = ASTNode.extend({
       function(vm) {
         return new Executor([], 
           function() {
-            return string_literal_node.value;
+            return new StringClass(string_literal_node.value);
           }
         );
       },

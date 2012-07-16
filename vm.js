@@ -113,7 +113,8 @@ var VirtualMachine = Class.extend({
     this.memory = new Memory(this.memory_ui);
     this.output = new Output(this.output_ui);
     this.primitives = {
-      input: new InputPrimitiveNode(this),
+      input_string: new InputStringPrimitiveNode(this),
+      input_number: new InputNumberPrimitiveNode(this),
       output: new OutputPrimitiveNode(this)
     };
     this.statements = statements;

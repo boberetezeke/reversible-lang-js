@@ -22,15 +22,15 @@ var MemoryUI = Class.extend({
   },
 
   replace_value: function(name, value, old_value) {
-      $(this.pw.selector("memory-" + name)).replaceWith(this.dom_row(name, value, old_value));
+      $(this.pw.selector("memory-" + name)).replaceWith(this.dom_row(name, value.type_string, value.value(), old_value));
   },
 
   new_value: function(name, value) {
-      $(this.pw.selector("memory-table")).append(this.dom_row(name, value, ""));
+      $(this.pw.selector("memory-table")).append(this.dom_row(name, value.type_string, value.value(), ""));
   },
 
-  dom_row: function(name, value, old_value) {
-    return "<tr id=\"" + this.pw.prefix + "-memory-" + name + "\"><td class=\"memory-cell\">" + name + "</td><td class=\"memory-cell\">" + value + "</td><td class=\"memory-cell\">" + old_value + "</td></tr>"
+  dom_row: function(name, type_string, value, old_value) {
+    return "<tr id=\"" + this.pw.prefix + "-memory-" + name + "\"><td class=\"memory-cell\">" + name + "</td><td class=\"memory-cell\">" + type_string + "<td class=\"memory-cell\">" + value + "</td><td class=\"memory-cell\">" + old_value + "</td></tr>"
   }
 });
 
@@ -80,7 +80,7 @@ var ProgrammingWidget = Class.extend({
       console.log("rows = " + rows);
 
       $(this.selector("program-table")).html(rows);
-      $(this.selector("memory-table")).html("<tr><td class=\"memory-header-cell\">Name</td><td class=\"memory-header-cell\">Value</td><td class=\"memory-header-cell\">Old Value</td></tr>");
+      $(this.selector("memory-table")).html("<tr><td class=\"memory-header-cell\">Name</td><td class=\"memory-header-cell\">Type</td><td class=\"memory-header-cell\">Value</td><td class=\"memory-header-cell\">Old Value</td></tr>");
       $(this.selector("output-table")).html("");
 
       $(this.selector("editor-section")).hide();

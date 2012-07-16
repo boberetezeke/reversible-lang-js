@@ -1,14 +1,24 @@
 
 var SimpleClass = Class.extend({
-  
+  value: function() {
+    return this.instance_value;
+  }
 });
 
 var NumberClass = SimpleClass.extend({
+  init: function(value) {
+    this.instance_value = Number(value);
+  },
 
+  type_string: "Number",
 });
 
 var StringClass = SimpleClass.extend({
+  init: function(value) {
+    this.instance_value = String(value);
+  },
 
+  type_string: "String",
 });
 
 var PromiseClass = SimpleClass.extend({
@@ -24,6 +34,8 @@ var PromiseClass = SimpleClass.extend({
   value: function() {
     return this.value_function();
   },
+
+  type_string: "Promise",
 
   satisfy: function() {
     this.is_satisfied = true;

@@ -1,5 +1,11 @@
 var ASTNode = Class.extend({
-  
+
+  /*
+  set_next: function(ast_node) {
+    this.next = ast_node;
+  },
+  */
+
   generate_operations: function(vm) {
     return this.operation(vm);
   }

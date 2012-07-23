@@ -1,1 +1,3 @@
-.backups/**
+.backups
+**/.backups
+*.swp

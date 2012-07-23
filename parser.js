@@ -13,6 +13,15 @@ var Parser = Class.extend({
         this.statements.push(this.statement());
       }
 
+      /*
+      var last_statement = this.statements[0];
+      for (var i = 1; i < this.statements.length; i++) {
+        last_statement.set_next(last_statement);
+        last_statement = this.statements[i];
+      }
+      this.statements[this.statements.length - 1].set_next(null);
+      */
+      
       return this.statements;
     }
     catch (e) {
@@ -67,16 +76,26 @@ var Parser = Class.extend({
       if (next == "=") {
         return this.assignment_statement(lhs);
       }
-      else {
+      else if (next == "(") {
         var args = []
-        while (next != "\n") {
-          this.tokenizer.unnext_token();
+        while (next != ")" && next != "\n") {
           args.push(this.expression());
           next = this.tokenizer.next_token();
+          if (next == ",")
+            next = this.tokenizer.next_token();
         }
+
+        if (next == "\n")
+          throw("no closing paren for function invocation");
+
+        next = this.tokenizer.next_token();
+        if (next != "\n")
+          throw("exteraneous tokens after function closing paren = '" + next + "'"); 
 
         return new FunctionNode(lhs, args);
       }
+      else
+        throw("only assignment and function call statements allow");
     }
   },
 

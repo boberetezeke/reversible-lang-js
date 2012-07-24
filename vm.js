@@ -112,13 +112,14 @@ var VirtualMachine = Class.extend({
   start: function(statements) {
     this.memory = new Memory(this.memory_ui);
     this.output = new Output(this.output_ui);
+    virtual_machine = this;
     this.primitives = {
-      input_string: new InputStringPrimitiveNode(this),
-      input_number: new InputNumberPrimitiveNode(this),
-      output: new OutputPrimitiveNode(this)
+      input_string: function() { return new InputStringPrimitiveNode(virtual_machine) },
+      input_number: function() { return new InputNumberPrimitiveNode(virtual_machine) },
+      output:       function() { return new OutputPrimitiveNode(virtual_machine) }
     };
     this.statements = statements;
-    this.current_statement_index = 0;
+    this.current_statement = this.statements[0];
     this.undo_stack = [];
     this.executor_stack = [];
   },
@@ -146,11 +147,10 @@ var VirtualMachine = Class.extend({
   },
 
   step: function() {
-    if (this.current_statement_index == this.statements.length)
+    if (this.current_statement.next() == null)
       return false;
 
-    var current_statement = this.statements[this.current_statement_index];
-    var operation = current_statement.generate_operations(this)
+    var operation = this.current_statement.generate_operations(this)
 
     operation.capture_current_state(this);
     var operation_executor = operation.do(this)
@@ -193,6 +193,12 @@ var VirtualMachine = Class.extend({
     }
 
     return true;
+  },
+
+  set_current_statement: function(next_statement) {
+    old_statement = this.current_statement;
+    this.current_statement = next_statement;
+    this.program_ui.move_instruction_pointer(old_statement.line_number, next_statement.line_number);
   },
 
   set_current_statement_index: function(new_index) {

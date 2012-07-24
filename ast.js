@@ -1,10 +1,25 @@
 var ASTNode = Class.extend({
-
-  /*
-  set_next: function(ast_node) {
-    this.next = ast_node;
+  
+  init: function() {
+    this.nextNode = null;
+    this.line_number = 0;
+    this.start_column = 0;
+    this.end_column = 0;
   },
-  */
+
+  set_line_number_and_columns: function (line_number, start_column, end_column) {
+      this.line_number = line_number;
+      this.start_column = start_column;
+      this.end_column = end_column;
+  },
+
+  set_next_statement: function(ast_node) {
+    this.nextNode = ast_node;
+  },
+
+  next: function() {
+    return this.nextNode;
+  },
 
   generate_operations: function(vm) {
     return this.operation(vm);
@@ -16,21 +31,63 @@ var EmptyStatementNode = ASTNode.extend({
 
 });
 
+/*
+var IfStatementNode = ASTNode.extend({
+  init: function(expression) {
+    this.expression = expression;
+  },
+
+  class_name: "IfStatementNode",
+
+  operation: function(vm) {
+    var if_statement_node = this;
+    return new Operation(
+      function() {
+      },
+      function(vm) {
+        var expression_func = if_statement_node.expression.do(vm);
+        return new Executor([expression_func], function() {
+          var expression_value = expression.value()
+          if (expression_value === true) {
+                        
+          }
+          else {
+            vm.set
+      },
+      function(vm) {
+      } 
+  },
+
+  generate_operations: function(vm) {
+    return this.operation(vm);
+  }
+  
+});
+*/
+
 var FunctionNode = ASTNode.extend({
-  init: function(name, args) {
+  init: function(name, args, line_number) {
+    this._super();
     this.name = name;
     this.args = args;
+    if (arguments.length >= 3)
+      this.line_number = line_number;
   },
 
   class_name: "FunctionNode",
 
   operation: function(vm) {
     var function_node = this;
-    var primitive = vm.primitives[this.name];
+    var primitive_func = vm.primitives[this.name];
 
-    if (primitive) {
-      primitive.args = this.args
-      return primitive.operation(vm);
+    if (!this.primitive && primitive_func) {
+      this.primitive = primitive_func();
+      this.primitive.args = this.args;
+      this.primitive.line_number = this.line_number;
+      this.primitive.start_column = this.start_column;
+      this.primitive.end_column = this.end_column;
+      this.primitive.nextNode = this.nextNode
+      return this.primitive.operation(vm);
     }
     else {
       return new Operation(
@@ -52,7 +109,7 @@ var FunctionNode = ASTNode.extend({
   }
 });
 
-
+/*
 var WaitForPrimitiveNode = FunctionNode.extend({
   class_name: "WaitForPrimitiveNode",
 
@@ -81,6 +138,7 @@ var WaitForPrimitiveNode = FunctionNode.extend({
     );
   }
 });
+*/
 
 var InputPrimitiveNode = FunctionNode.extend({
   class_name: "InputPrimitiveNode",
@@ -120,7 +178,6 @@ var InputPrimitiveNode = FunctionNode.extend({
             return new value_class($("#" + input_id).val());
           });
 
-          //vm.set_current_statement_index(vm.current_statement_index + 1);
           return input_primitive_node.promise;
         });
       },
@@ -176,7 +233,7 @@ var OutputPrimitiveNode = FunctionNode.extend({
             var arg = arg_funcs[i].value();
             vm.output.push(String(arg.value()));
           }
-          vm.set_current_statement_index(vm.current_statement_index + 1);
+          vm.set_current_statement(output_primitive_node.next());
         });
       },
       function(vm) {
@@ -187,9 +244,12 @@ var OutputPrimitiveNode = FunctionNode.extend({
 });
 
 var AssignmentNode = ASTNode.extend({
-  init: function(lhs, rhs) {
+  init: function(lhs, rhs, line_number) {
+    this._super();
     this.lhs = lhs;
     this.rhs = rhs;
+    if (arguments.length >= 3)
+      this.line_number = line_number;
   },
 
   class_name: "AssignmentNode",
@@ -209,7 +269,7 @@ var AssignmentNode = ASTNode.extend({
         return new Executor([rhs_func], function() {
           var value = rhs_func.value()
           vm.memory.set(assignment_node.lhs, value);
-          vm.set_current_statement_index(vm.current_statement_index + 1);
+          vm.set_current_statement(assignment_node.next());
           return value;
         });
       },
@@ -234,10 +294,13 @@ var AssignmentNode = ASTNode.extend({
 });
 
 var ExpressionNode = ASTNode.extend({
-  init: function(lhs, operation, rhs) {
+  init: function(lhs, operation, rhs, line_number) {
+    this._super();
     this.lhs = lhs;
     this.operation = operation;
     this.rhs = rhs;
+    if (arguments.length >= 4)
+      this.line_number = line_number;
   },
 
   class_name: "ExpressionNode",
@@ -272,8 +335,11 @@ var ExpressionNode = ASTNode.extend({
 });
 
 var NumberLiteralNode = ASTNode.extend({
-  init: function(value) {
+  init: function(value, line_number) {
+    this._super();
     this.value = value;
+    if (arguments.length >= 2)
+      this.line_number = line_number;
   },
 
   class_name: "NumberLiteralNode",
@@ -297,8 +363,11 @@ var NumberLiteralNode = ASTNode.extend({
 });
 
 var StringLiteralNode = ASTNode.extend({
-  init: function(value) {
+  init: function(value, line_number) {
+    this._super();
     this.value = value;
+    if (arguments.length >= 2)
+      this.line_number = line_number;
   },
 
   class_name: "StringLiteralNode",
@@ -322,8 +391,11 @@ var StringLiteralNode = ASTNode.extend({
 });
 
 var VariableNode = ASTNode.extend({
-  init: function(name) {
+  init: function(name, line_number) {
+    this._super();
     this.name = name;
+    if (arguments.length >= 2) 
+      this.line_number = line_number;
   },
 
   class_name: "VariableNode",

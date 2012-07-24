@@ -13,14 +13,12 @@ var Parser = Class.extend({
         this.statements.push(this.statement());
       }
 
-      /*
       var last_statement = this.statements[0];
       for (var i = 1; i < this.statements.length; i++) {
-        last_statement.set_next(last_statement);
-        last_statement = this.statements[i];
+        var current_statement = this.statements[i];
+        last_statement.set_next_statement(current_statement);
+        last_statement = current_statement;
       }
-      this.statements[this.statements.length - 1].set_next(null);
-      */
       
       return this.statements;
     }
@@ -32,89 +30,97 @@ var Parser = Class.extend({
 
   statement: function() {
     var lhs = this.tokenizer.next_token();
-    console.log("statement: lhs = <" + lhs + ">");
-    if (lhs == "\n") {
-      return new EmptyStatementNode();
+    console.log("statement: lhs = <" + lhs.string + ">");
+    if (lhs.is_end_of_line()) {
+      empty_statement_node = new EmptyStatementNode();
+      empty_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
+      return empty_statement_node;
     }
 
-    else if (lhs == "if" || lhs == "elsif") {
+    else if (lhs.is_equal_to("if") || lhs.is_equal_to("elsif")) {
       var expr = this.expression();
       var next = this.tokenizer.next_token();
 
-      if (next != "\n")
-        throw("extra token <" + next + "> after if expression");
+      if (!next.is_end_of_line())
+        throw("extra token <" + next.string + "> after if expression");
     
       return IfStatementNode(lhs, expr);
     }
 
-    else if (lhs == "else") {
+    else if (lhs.is_equal_to("else")) {
       var next = this.tokenizer.next_token();
      
-      if (next != "\n")
+      if (!next.is_end_of_line())
         throw("else not alone on line"); 
     }
 
-    else if (lhs == "while") {
+    else if (lhs.is_equal_to("while")) {
       var expr = this.expression();
       var next = this.tokenizer.next_token();
 
-      if (next != "\n")
+      if (!next.is_end_of_line())
         throw("extra token <" + next + ">  after while expression");
     }
 
-    else if (lhs == "end") {
+    else if (lhs.is_equal_to("end")) {
       var next = this.tokenizer.next_token();
      
-      if (next != "\n")
+      if (!next.is_end_of_line())
         throw("end not alone on line"); 
     }
 
     else {
-
       var next = this.tokenizer.next_token();
-      console.log("statement: next = <" + next + ">");
-      if (next == "=") {
+
+      console.log("statement: next = <" + next.string + ">");
+      if (next.is_equal_to("=")) {
         return this.assignment_statement(lhs);
       }
-      else if (next == "(") {
+      else if (next.is_equal_to("(")) {
         var args = []
-        while (next != ")" && next != "\n") {
+        while (!next.is_equal_to(")") && !next.is_equal_to("\n")) {
           args.push(this.expression());
           next = this.tokenizer.next_token();
-          if (next == ",")
+          if (next.is_equal_to(",")) 
             next = this.tokenizer.next_token();
         }
 
-        if (next == "\n")
+        if (next.is_end_of_line())
           throw("no closing paren for function invocation");
 
+        var closing_paren_token = next;
+
         next = this.tokenizer.next_token();
-        if (next != "\n")
+        if (!next.is_end_of_line())
           throw("exteraneous tokens after function closing paren = '" + next + "'"); 
 
-        return new FunctionNode(lhs, args);
+        var function_node = new FunctionNode(lhs.string, args);
+        function_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, closing_paren_token.end_column); 
+        return function_node;
       }
       else
-        throw("only assignment and function call statements allow");
+        throw("only assignment and function call statements allowed");
     }
   },
 
   assignment_statement: function(lhs) {
     var rhs = this.tokenizer.next_token();
-    console.log("assignment_statement: rhs = <" + rhs + ">");
-    if (rhs == "\n") {
+    console.log("assignment_statement: rhs = <" + rhs.string + ">");
+    if (rhs.is_end_of_line()) {
       throw("no rhs for assignment");
     }
     else {
       this.tokenizer.unnext_token();
       rhs = this.expression();
-      newline = this.tokenizer.next_token();
+      newline = this.tokenizer.next_token()
 
-      if (newline != "\n") {
+      if (!newline.is_end_of_line()) {
         throw("newline expected after assignment expression");
       }
       else {
-        return new AssignmentNode(lhs, rhs);
+        assignment_node = new AssignmentNode(lhs.string, rhs);
+        assignment_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
+        return assignment_node;
       }
     }
   },
@@ -122,28 +128,28 @@ var Parser = Class.extend({
   expression: function() {
     var expr1 = this.variable_or_literal(this.tokenizer.next_token());
     var op = this.tokenizer.next_token();
-    console.log("expression: expr1 = <" + expr1 + ">, op = <" + op + ">");
-    if (op == "\n" || op == ")") {
+    console.log("expression: expr1 = <" + expr1 + ">, op = <" + op.string + ">");
+    if (op.is_end_of_line() || op.is_equal_to(")")) {
       var op = this.tokenizer.unnext_token();
       return expr1;
     }
-    else if (op == "(") {
+    else if (op.is_equal_to("(")) {
 
       var args = []
       var next = this.tokenizer.next_token();
-      while (next != ")" && next != "\n") {
+      while (!next.is_equal_to(")") && !next.is_end_of_line()) {
         this.tokenizer.unnext_token();
         args.push(this.expression());
         next = this.tokenizer.next_token();
       }
 
-      if (next == "\n") {
+      if (next.is_end_of_line()) {
         throw("function missing closing ')'");
       }
 
       return new FunctionNode(expr1.name, args);
     }
-    else if (op == "-" || op == "+" || op == "*" || op == "/") {
+    else if (op.is_one_of("-", "+", "*", "/")) {
       var expr2 = this.variable_or_literal(this.tokenizer.next_token());
       return new ExpressionNode(expr1, op, expr2);
     }
@@ -152,33 +158,36 @@ var Parser = Class.extend({
     }
   },
 
-  variable_or_literal: function(string) {
-    if (string == "\n") {
+  variable_or_literal: function(token) {
+    if (token.is_end_of_line()) {
       throw("end of line received when expecting variable or literal");
     }
 
+    var node;
     // if starts with a number or ", then its a literal
-    if (/^[0-9"]/.exec(string)) {
-      return this.literal(string);
+    if (/^[0-9"]/.exec(token.string)) {
+      node = this.literal(token);
     }
     else {
-      return this.variable(string);
+      node = this.variable(token);
     }
+    node.set_line_number_and_columns(token.line_number, token.start_column, token.end_column);
+    return node;
   },
 
-  variable: function(string) {
-    return new VariableNode(string);
+  variable: function(token) {
+    return new VariableNode(token.string);
   },
 
-  literal: function(string) {
-    if (/^[0-9]+$/.exec(string)) {
-      return new NumberLiteralNode(string);
+  literal: function(token) {
+    if (/^[0-9]+$/.exec(token.string)) {
+      return new NumberLiteralNode(token.string);
     }
-    else if (m = /^"([^"]*)"$/.exec(string)) {
+    else if (m = /^"([^"]*)"$/.exec(token.string)) {
       return new StringLiteralNode(m[1]);
     }
     else {
-      throw("invalid literal: " + string);
+      throw("invalid literal: " + token.string);
     }
   }
 

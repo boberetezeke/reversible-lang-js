@@ -85,6 +85,7 @@ describe("Parser", function() {
       assignment_node.set_next_statement(if_statement_node, true);
     expect(statements).toEqual([if_statement_node]);
   });
+
 });
 
 

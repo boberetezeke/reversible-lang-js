@@ -51,14 +51,17 @@ var IfStatementNode = ASTNode.extend({
   operation: function(vm) {
     var if_statement_node = this;
     return new Operation(
-      function() {
+      function(vm) {
       },
       function(vm) {
-        var expression_func = if_statement_node.expression.do(vm);
+        var expression_func = if_statement_node.expression_operation.do(vm);
         return new Executor([expression_func], function() {
-          var expression_value = expression.value()
+          var expression_value = expression_func.value()
           if (expression_value === true) {
-                        
+            vm.set_current_statement(if_statement_node.code_block.statements[0]);
+          }
+          else {
+            vm.set_current_statement(if_statement_node.next_node);
           }
         });
       },
@@ -69,6 +72,7 @@ var IfStatementNode = ASTNode.extend({
   },
 
   generate_operations: function(vm) {
+    this.expression_operation = this.expression.generate_operations(vm);
     return this.operation(vm);
   }
   
@@ -335,10 +339,10 @@ var AssignmentNode = ASTNode.extend({
 });
 
 var ExpressionNode = ASTNode.extend({
-  init: function(lhs, operation, rhs, line_number) {
+  init: function(lhs, operation_string, rhs, line_number) {
     this._super();
     this.lhs = lhs;
-    this.operation = operation;
+    this.operation_string = operation_string;
     this.rhs = rhs;
     if (arguments.length >= 4)
       this.line_number = line_number;
@@ -347,22 +351,23 @@ var ExpressionNode = ASTNode.extend({
   class_name: "ExpressionNode",
 
   operation: function(vm) {
+    var expression_node = this;
     return new Operation(
       function(vm) {
-        this.lhs_operation.capture_current_state(vm);
-        this.rhs_operation.capture_current_state(vm);
+        expression_node.lhs_operation.capture_current_state(vm);
+        expression_node.rhs_operation.capture_current_state(vm);
       },
       function(vm) {
-        var lhs_func = this.lhs_operation.do(vm);
-        var rhs_func = this.rhs_operation.do(vm);
+        var lhs_func = expression_node.lhs_operation.do(vm);
+        var rhs_func = expression_node.rhs_operation.do(vm);
         return new Executor([lhs_func, rhs_func], function() {
-          eval_str = lhs_func.value() + " " + this.operation + " " + rhs_func.value();
+          eval_str = lhs_func.value().value() + " " + expression_node.operation_string + " " + rhs_func.value().value();
           return eval(eval_str);
         });
       },
       function(vm) {
-        this.rhs_operation.undo(vm);
-        this.lhs_operation.undo(vm);
+        expression_node.rhs_operation.undo(vm);
+        expression_node.lhs_operation.undo(vm);
       }
     )
   },
@@ -386,7 +391,7 @@ var NumberLiteralNode = ASTNode.extend({
   class_name: "NumberLiteralNode",
   
   operation: function(vm) {
-    number_literal_node = this;
+    var number_literal_node = this;
     return new Operation(
       function(vm) {
       },
@@ -414,7 +419,7 @@ var StringLiteralNode = ASTNode.extend({
   class_name: "StringLiteralNode",
   
   operation: function(vm) {
-    string_literal_node = this;
+    var string_literal_node = this;
     return new Operation(
       function(vm) {
       },
@@ -442,7 +447,7 @@ var VariableNode = ASTNode.extend({
   class_name: "VariableNode",
 
   operation: function(vm) {
-    variable_node = this;
+    var variable_node = this;
     return new Operation(
       function(vm) {
       },

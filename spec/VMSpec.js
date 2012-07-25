@@ -56,16 +56,16 @@ describe("VirtualMachine", function() {
     mock_output_ui = new MockOutputUI;
     vm = new VirtualMachine(mock_widget_ui, mock_program_ui, mock_memory_ui, mock_output_ui);
   });
-
-  /*
+  
+/*
   it("should be able to execute a simple assignment without a trailing newline", function() {
     vm.start(parser.parse("a = 1"));
     vm.step();
     expect(mock_program_ui.method_calls).toEqual([{method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}}]);
     expect(mock_memory_ui.method_calls).toEqual([{method_name: "new_value", args: {name: "a", value: new NumberClass("1")}}]);
   });
-  */
-
+*/
+  
   it("should be able to execute a simple assignment", function() {
     vm.start(parser.parse("a = 1\n"));
     vm.step();
@@ -95,4 +95,19 @@ describe("VirtualMachine", function() {
     expect(mock_output_ui.method_calls.length).toEqual(0);
     expect(mock_memory_ui.method_calls.length).toEqual(0);
   });
+
+  it("should be able to take an if", function() {
+    vm.start(parser.parse("if 1 == 1\na = 1\nend\nb = 1\n"));
+
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}});
+  });
+
+  it("should be able to skip an if", function() {
+    vm.start(parser.parse("if 1 == 0\na = 1\nend\nb = 1\n"));
+
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 3}});
+  });
+  
 });

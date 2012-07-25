@@ -358,10 +358,11 @@ var AssignmentNode = ASTNode.extend({
     return new Operation(
       function(vm) {
         assignment_node.rhs_operation.capture_current_state(vm);
-        assignment_node.lhs = assignment_node.lhs
-        assignment_node.did_exist = vm.memory.exists(assignment_node.lhs);
-        if (assignment_node.did_exist)
-          assignment_node.old_value = vm.memory.get(assignment_node.lhs)
+        this.lhs = assignment_node.lhs
+        this.did_exist = vm.memory.exists(this.lhs);
+        if (this.did_exist) {
+          this.old_value = vm.memory.get(this.lhs)
+        }
       },
       function(vm) {
         var rhs_func = assignment_node.rhs_operation.do(vm);
@@ -374,12 +375,12 @@ var AssignmentNode = ASTNode.extend({
       },
       function(vm) {
         // if the value didn't exist
-        if (!assignment_node.did_exist) 
+        if (!this.did_exist) 
           // remove it
-          vm.memory.remove(assignment_node.lhs)
+          vm.memory.remove(this.lhs)
         else
           // restore the old value
-          vm.memory.set(assignement_node.lhs, assignment_node.old_value);
+          vm.memory.set(this.lhs, this.old_value);
         assignment_node.rhs_operation.undo(vm);
       }
     )

@@ -74,7 +74,7 @@ var ProgrammingWidget = Class.extend({
       $(this.selector("error")).hide();
       rows = "";
       program_lines = source.split("\n");
-      for (i = 0; i < this.parser.statements.length; i++) {
+      for (i = 0; i < program_lines.length; i++) {
         rows = rows + "<tr><td><span id=\"" + this.prefix + "-ip-" + i + "\">--&gt;</span></td><td id=\"statement-" + i + "\">" + program_lines[i] + "</td></tr>";
       }
       console.log("rows = " + rows);
@@ -89,11 +89,11 @@ var ProgrammingWidget = Class.extend({
       $(this.selector("backward-disabled")).hide();
       $(this.selector("forward-disabled")).hide();
 
-      for (i = 1; i < this.parser.statements.length; i++) {
+      for (i = 1; i < program_lines.length; i++) {
         $(this.selector("ip-") + i).hide();
       }
 
-      this.virtual_machine.start(this.parser.statements);
+      this.virtual_machine.start(this.parser.code_block.statements);
     } 
   },
 

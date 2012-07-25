@@ -8,7 +8,7 @@ var Operation = Class.extend({
   class_name: "Operation",
 
   capture_current_state: function(vm) {
-    this.saved_current_statement_index = vm.current_statement_index;
+    this.saved_current_statement = vm.current_statement;
     this.capture_function(vm);
   },
 
@@ -18,7 +18,7 @@ var Operation = Class.extend({
 
   undo: function(vm) {
     this.undo_statement(vm);
-    vm.set_current_statement_index(this.saved_current_statement_index);
+    vm.set_current_statement(this.saved_current_statement);
   }
 });
 

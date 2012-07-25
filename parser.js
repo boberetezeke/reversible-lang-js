@@ -64,8 +64,19 @@ var Parser = Class.extend({
       var next = this.tokenizer.next_token();
 
       if (!next.is_end_of_line())
-        throw("extra token <" + next + ">  after while expression");
-      return new WhileStatementNode(lhs, expr);
+        throw("extra token <" + next.string + "> after while expression");
+    
+      var while_statement_node = new WhileStatementNode(expr, new CodeBlockNode);
+      while (true) {
+        var statement = this.statement();
+        if (statement instanceof EndStatementNode) 
+          break;
+        
+        while_statement_node.code_block.push_statement(statement); 
+      } 
+
+      while_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
+      return while_statement_node;
     }
 
     else if (lhs.is_equal_to("end")) {
@@ -157,7 +168,7 @@ var Parser = Class.extend({
 
       return new FunctionNode(expr1.name, args);
     }
-    else if (op.is_one_of(["-", "+", "*", "/", "==", "!="])) {
+    else if (op.is_one_of(["-", "+", "*", "/", "==", "!=", "<", "<=", ">", ">="])) {
       var expr2 = this.variable_or_literal(this.tokenizer.next_token());
       return new ExpressionNode(expr1, op.string, expr2);
     }

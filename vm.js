@@ -200,12 +200,5 @@ var VirtualMachine = Class.extend({
     this.current_statement = next_statement;
     this.program_ui.move_instruction_pointer(old_statement.line_number, next_statement.line_number);
   },
-
-  set_current_statement_index: function(new_index) {
-    old_index = this.current_statement_index;
-    this.current_statement_index = new_index;
-    this.program_ui.move_instruction_pointer(old_index, new_index);
-  },
-
 });
 

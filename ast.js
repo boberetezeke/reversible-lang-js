@@ -5,6 +5,7 @@ var ASTNode = Class.extend({
     this.line_number = 0;
     this.start_column = 0;
     this.end_column = 0;
+    this.follow_next_node = false;
   },
 
   set_line_number_and_columns: function (line_number, start_column, end_column) {
@@ -13,9 +14,8 @@ var ASTNode = Class.extend({
       this.end_column = end_column;
   },
 
-  set_next_statement: function(ast_node, follow_node) {
+  set_next_statement: function(ast_node) {
     this.next_node = ast_node;
-    this.follow_next_node = follow_node;
   },
 
   next: function() {
@@ -42,6 +42,7 @@ var IfStatementNode = ASTNode.extend({
     this.expression = expression;
     this.code_block = code_block;
     code_block.parent_node = this;
+    this.follow_next_node = true;
     if (arguments.length >= 4) 
       this.set_line_number_and_columns(line_number, 0, 0);
   },
@@ -57,7 +58,7 @@ var IfStatementNode = ASTNode.extend({
         var expression_func = if_statement_node.expression_operation.do(vm);
         return new Executor([expression_func], function() {
           var expression_value = expression_func.value()
-          if (expression_value === true) {
+          if (expression_value.value() === true) {
             vm.set_current_statement(if_statement_node.code_block.statements[0]);
           }
           else {
@@ -78,6 +79,46 @@ var IfStatementNode = ASTNode.extend({
   
 });
 
+var WhileStatementNode = ASTNode.extend({
+  init: function(expression, code_block, line_number) {
+    this.expression = expression;
+    this.code_block = code_block;
+    code_block.parent_node = this;
+    if (arguments.length >= 3) 
+      this.set_line_number_and_columns(line_number, 0, 0);
+  },
+
+  class_name: "WhileStatementNode",
+
+  operation: function(vm) {
+    var if_statement_node = this;
+    return new Operation(
+      function(vm) {
+      },
+      function(vm) {
+        var expression_func = if_statement_node.expression_operation.do(vm);
+        return new Executor([expression_func], function() {
+          var expression_value = expression_func.value()
+          if (expression_value.value() === true) {
+            vm.set_current_statement(if_statement_node.code_block.statements[0]);
+          }
+          else {
+            vm.set_current_statement(if_statement_node.next_node);
+          }
+        });
+      },
+
+      function(vm) {
+      } 
+    )
+  },
+
+  generate_operations: function(vm) {
+    this.expression_operation = this.expression.generate_operations(vm);
+    return this.operation(vm);
+  }
+});
+
 var EndStatementNode = ASTNode.extend({
 });
 
@@ -96,7 +137,7 @@ var CodeBlockNode = ASTNode.extend({
     if (this.statements.length > 0) {
       // set it's next statement to the current statement
       var last_statement = this.statements[this.statements.length - 1];
-      last_statement.set_next_statement(statement, false);
+      last_statement.set_next_statement(statement);
     }
     // add in this statement
     this.statements.push(statement);
@@ -104,7 +145,7 @@ var CodeBlockNode = ASTNode.extend({
     // this is now the last statement so set the parent as the
     // the next if there is a parent
     if (this.parent_node)
-      statement.set_next_statement(this.parent_node, true);
+      statement.set_next_statement(this.parent_node);
   }
   
 });
@@ -307,7 +348,7 @@ var AssignmentNode = ASTNode.extend({
         assignment_node.lhs = assignment_node.lhs
         assignment_node.did_exist = vm.memory.exists(assignment_node.lhs);
         if (assignment_node.did_exist)
-          assignement_node.old_value = vm.memory.get(assignment_node.lhs)
+          assignment_node.old_value = vm.memory.get(assignment_node.lhs)
       },
       function(vm) {
         var rhs_func = assignment_node.rhs_operation.do(vm);
@@ -361,8 +402,16 @@ var ExpressionNode = ASTNode.extend({
         var lhs_func = expression_node.lhs_operation.do(vm);
         var rhs_func = expression_node.rhs_operation.do(vm);
         return new Executor([lhs_func, rhs_func], function() {
-          eval_str = lhs_func.value().value() + " " + expression_node.operation_string + " " + rhs_func.value().value();
-          return eval(eval_str);
+          var eval_str = lhs_func.value().value() + " " + expression_node.operation_string + " " + rhs_func.value().value();
+          var value = eval(eval_str);
+          if (typeof(value) == "number")
+            return new NumberClass(value);
+          else if (typeof(value) == "string")
+            return new StringClass(value);
+          else if (typeof(value) == "boolean")
+            return new BooleanClass(value);
+          else
+            return new NumberClass(value);
         });
       },
       function(vm) {

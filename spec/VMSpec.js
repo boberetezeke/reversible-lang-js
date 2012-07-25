@@ -116,6 +116,27 @@ describe("VirtualMachine", function() {
     expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 3}});
   });
   
+  // FIXME: add in test for empty if code block
+  // FIXME: add in test for empty else code block
+
+  it("should be able to take the else case of an if", function() {
+    vm.start(parser.parse("if 1 == 0\na = 1\nelse\na = 2\nend\nb = 1\n"));
+
+    // should skip over to the else clause 
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 3}});
+  });
+
+  it("should be able to skip an if", function() {
+    vm.start(parser.parse("c = 1\nif 1 == 0\na = 1\nend\nb = 1\n"));
+
+    // should go to if after c = 1
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}});
+  });
+
+  // FIXME: add in test for empty while code block
+
   it("should be able to do one loop iteration", function() {
     vm.start(parser.parse("a = 0\nwhile a == 0\na = a + 1\nend\nb = 1\n"));
 

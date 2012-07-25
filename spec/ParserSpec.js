@@ -86,6 +86,23 @@ describe("Parser", function() {
     expect(statements).toEqual([if_statement_node]);
   });
 
+  it("should parse and if statement, an inner statement, else, inner, and an end", function() {
+    var statements = parser.parse("if 1 == 1\na = 1\nelse\na = 2\nend");
+    var assignment_node1 = new AssignmentNode("a", new NumberLiteralNode("1", 1), 1);
+    var assignment_node2 = new AssignmentNode("a", new NumberLiteralNode("2", 3), 3);
+    var if_statement_node = new IfStatementNode(
+      "if",
+      new ExpressionNode(new NumberLiteralNode("1"), "==", new NumberLiteralNode("1"), 0),
+      new CodeBlockNode(
+        null, 
+        [assignment_node1] 
+      ), 0);
+    assignment_node1.set_next_statement(if_statement_node, true);
+    assignment_node2.set_next_statement(if_statement_node, true);
+    if_statement_node.else_code_block = new CodeBlockNode(if_statement_node, [assignment_node2]);
+
+    expect(statements).toEqual([if_statement_node]);
+  });
 });
 
 

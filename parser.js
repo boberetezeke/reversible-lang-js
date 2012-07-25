@@ -38,12 +38,21 @@ var Parser = Class.extend({
         throw("extra token <" + next.string + "> after if expression");
     
       var if_statement_node = new IfStatementNode(lhs.string, expr, new CodeBlockNode);
+      var code_block = if_statement_node.code_block;
       while (true) {
         var statement = this.statement();
-        if (statement instanceof EndStatementNode) 
+        if (statement instanceof ElseStatementNode) {
+          if (if_statement_node.else_code_block) {
+            throw "multiple else statements found for if";
+          }
+          if_statement_node.else_code_block = new CodeBlockNode(if_statement_node);
+          code_block = if_statement_node.else_code_block;
+          continue;
+        }
+        else if (statement instanceof EndStatementNode) 
           break;
         
-        if_statement_node.code_block.push_statement(statement); 
+        code_block.push_statement(statement); 
       } 
 
       if_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);

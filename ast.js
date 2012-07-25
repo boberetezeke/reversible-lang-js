@@ -14,13 +14,16 @@ var ASTNode = Class.extend({
       this.end_column = end_column;
   },
 
-  set_next_statement: function(ast_node) {
+  set_next_statement: function(ast_node, from_code_block) {
     this.next_node = ast_node;
+    this.from_code_block = from_code_block;
   },
 
   next: function() {
     var node = this.next_node;
-    while (node && node.follow_next_node) {
+    var from_code_block = this.from_code_block
+    while (node && from_code_block && node.follow_next_node) {
+      from_code_block = node.from_code_block
       node = node.next_node;
     }
     return node;
@@ -41,6 +44,7 @@ var IfStatementNode = ASTNode.extend({
     this.iftype = iftype;
     this.expression = expression;
     this.code_block = code_block;
+    this.else_code_block = null;
     code_block.parent_node = this;
     this.follow_next_node = true;
     if (arguments.length >= 4) 
@@ -59,10 +63,16 @@ var IfStatementNode = ASTNode.extend({
         return new Executor([expression_func], function() {
           var expression_value = expression_func.value()
           if (expression_value.value() === true) {
-            vm.set_current_statement(if_statement_node.code_block.statements[0]);
+            if (if_statement_node.code_block.statements.length > 0)
+              vm.set_current_statement(if_statement_node.code_block.statements[0]);
+            else
+              vm.set_current_statement(if_statement_node.next_node);
           }
           else {
-            vm.set_current_statement(if_statement_node.next_node);
+            if (if_statement_node.else_code_block && if_statement_node.else_code_block.statements.length > 0)
+              vm.set_current_statement(if_statement_node.else_code_block.statements[0]);
+            else
+              vm.set_current_statement(if_statement_node.next_node);
           }
         });
       },
@@ -119,6 +129,9 @@ var WhileStatementNode = ASTNode.extend({
   }
 });
 
+var ElseStatementNode = ASTNode.extend({
+});
+
 var EndStatementNode = ASTNode.extend({
 });
 
@@ -137,7 +150,7 @@ var CodeBlockNode = ASTNode.extend({
     if (this.statements.length > 0) {
       // set it's next statement to the current statement
       var last_statement = this.statements[this.statements.length - 1];
-      last_statement.set_next_statement(statement);
+      last_statement.set_next_statement(statement, false);
     }
     // add in this statement
     this.statements.push(statement);
@@ -145,7 +158,7 @@ var CodeBlockNode = ASTNode.extend({
     // this is now the last statement so set the parent as the
     // the next if there is a parent
     if (this.parent_node)
-      statement.set_next_statement(this.parent_node);
+      statement.set_next_statement(this.parent_node, true);
   }
   
 });

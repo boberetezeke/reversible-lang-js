@@ -1,7 +1,7 @@
 var ASTNode = Class.extend({
   
   init: function() {
-    this.nextNode = null;
+    this.next_node = null;
     this.line_number = 0;
     this.start_column = 0;
     this.end_column = 0;
@@ -13,12 +13,17 @@ var ASTNode = Class.extend({
       this.end_column = end_column;
   },
 
-  set_next_statement: function(ast_node) {
-    this.nextNode = ast_node;
+  set_next_statement: function(ast_node, follow_node) {
+    this.next_node = ast_node;
+    this.follow_next_node = follow_node;
   },
 
   next: function() {
-    return this.nextNode;
+    var node = this.next_node;
+    while (node && node.follow_next_node) {
+      node = node.next_node;
+    }
+    return node;
   },
 
   generate_operations: function(vm) {
@@ -31,10 +36,14 @@ var EmptyStatementNode = ASTNode.extend({
 
 });
 
-/*
 var IfStatementNode = ASTNode.extend({
-  init: function(expression) {
+  init: function(iftype, expression, code_block, line_number) {
+    this.iftype = iftype;
     this.expression = expression;
+    this.code_block = code_block;
+    code_block.parent_node = this;
+    if (arguments.length >= 4) 
+      this.set_line_number_and_columns(line_number, 0, 0);
   },
 
   class_name: "IfStatementNode",
@@ -51,11 +60,12 @@ var IfStatementNode = ASTNode.extend({
           if (expression_value === true) {
                         
           }
-          else {
-            vm.set
+        });
       },
+
       function(vm) {
       } 
+    )
   },
 
   generate_operations: function(vm) {
@@ -63,7 +73,38 @@ var IfStatementNode = ASTNode.extend({
   }
   
 });
-*/
+
+var EndStatementNode = ASTNode.extend({
+});
+
+var CodeBlockNode = ASTNode.extend({
+  init: function(parent_node, statements) {
+    this._super();
+    this.parent_node = parent_node;
+    if (arguments.length >= 2) 
+      this.statements = statements;
+    else
+      this.statements = [];
+  },
+
+  push_statement: function(statement) {
+    // if there is a previous statement
+    if (this.statements.length > 0) {
+      // set it's next statement to the current statement
+      var last_statement = this.statements[this.statements.length - 1];
+      last_statement.set_next_statement(statement, false);
+    }
+    // add in this statement
+    this.statements.push(statement);
+
+    // this is now the last statement so set the parent as the
+    // the next if there is a parent
+    if (this.parent_node)
+      statement.set_next_statement(this.parent_node, true);
+  }
+  
+});
+
 
 var FunctionNode = ASTNode.extend({
   init: function(name, args, line_number) {
@@ -86,7 +127,7 @@ var FunctionNode = ASTNode.extend({
       this.primitive.line_number = this.line_number;
       this.primitive.start_column = this.start_column;
       this.primitive.end_column = this.end_column;
-      this.primitive.nextNode = this.nextNode
+      this.primitive.next_node = this.next_node
       return this.primitive.operation(vm);
     }
     else {

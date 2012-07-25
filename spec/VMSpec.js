@@ -88,7 +88,11 @@ describe("VirtualMachine", function() {
     expect(mock_memory_ui.method_calls.pop()).toEqual({method_name: "new_value", args: {name: "a", value: new NumberClass("1")}});
 
     vm.step();
-    expect(mock_program_ui.method_calls).toEqual([{method_name: "move_instruction_pointer", args: {old_index: 1, new_index: 2}}]);
-    expect(mock_output_ui.method_calls).toEqual([{method_name: "new_line", args: {new_line_index: 0, line: "1"}}]);
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 1, new_index: 2}});
+    expect(mock_output_ui.method_calls.pop()).toEqual({method_name: "new_line", args: {new_line_index: 0, line: "1"}});
+
+    expect(mock_program_ui.method_calls.length).toEqual(0);
+    expect(mock_output_ui.method_calls.length).toEqual(0);
+    expect(mock_memory_ui.method_calls.length).toEqual(0);
   });
 });

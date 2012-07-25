@@ -5,12 +5,20 @@ var SimpleClass = Class.extend({
   }
 });
 
+var BooleanClass = SimpleClass.extend({
+  init: function(value) {
+    this.instance_value = Boolean(value);
+  },
+
+  type_string: "Boolean"
+});
+
 var NumberClass = SimpleClass.extend({
   init: function(value) {
     this.instance_value = Number(value);
   },
 
-  type_string: "Number",
+  type_string: "Number"
 });
 
 var StringClass = SimpleClass.extend({
@@ -18,7 +26,7 @@ var StringClass = SimpleClass.extend({
     this.instance_value = String(value);
   },
 
-  type_string: "String",
+  type_string: "String"
 });
 
 var PromiseClass = SimpleClass.extend({

@@ -37,7 +37,7 @@ describe("Parser", function() {
       new AssignmentNode("b", new NumberLiteralNode("2", 1), 1)
     ];
 
-    expect_statements[0].set_next_statement(expect_statements[1]);
+    expect_statements[0].set_next_statement(expect_statements[1], false);
     expect(statements).toEqual(expect_statements);
     expect(statements[0].next()).toEqual(statements[1]);
     expect(statements[1].next()).toEqual(null);
@@ -52,8 +52,8 @@ describe("Parser", function() {
       new FunctionNode("output", [new VariableNode("a", 2)], 2)
     ];
 
-    expect_statements[0].set_next_statement(expect_statements[1]);
-    expect_statements[1].set_next_statement(expect_statements[2]);
+    expect_statements[0].set_next_statement(expect_statements[1], false);
+    expect_statements[1].set_next_statement(expect_statements[2], false);
 
 
     expect(statements[0].next()).toEqual(statements[1]);
@@ -63,15 +63,28 @@ describe("Parser", function() {
     expect(statements).toEqual(expect_statements);
   });
 
-
-/*
   it("should parse and if statement and an end", function() {
     var statements = parser.parse("if 1 == 1\nend");
     
-    expect(statements).toEqual(new IfNode(new NumberLiteralNode));
+    expect(statements).toEqual([new IfStatementNode(
+      "if",
+      new ExpressionNode(new NumberLiteralNode("1"), "==", new NumberLiteralNode("1"), 0),
+      new CodeBlockNode(), 0)]);
   });
-*/
 
+  it("should parse and if statement an inner statement and an end", function() {
+    var statements = parser.parse("if 1 == 1\na = 1\nend");
+    var assignment_node = new AssignmentNode("a", new NumberLiteralNode("1", 1), 1);
+    var if_statement_node = new IfStatementNode(
+      "if",
+      new ExpressionNode(new NumberLiteralNode("1"), "==", new NumberLiteralNode("1"), 0),
+      new CodeBlockNode(
+        null, 
+        [assignment_node] 
+      ), 0);
+      assignment_node.set_next_statement(if_statement_node, true);
+    expect(statements).toEqual([if_statement_node]);
+  });
 });
 
 

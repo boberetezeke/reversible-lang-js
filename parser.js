@@ -1,7 +1,7 @@
 
 var Parser = Class.extend({
   init: function() {
-    this.statements = [];
+    this.code_block = new CodeBlockNode(null);
   },
 
   parse: function(source) {
@@ -10,17 +10,10 @@ var Parser = Class.extend({
 
     try {
       while (!(this.tokenizer.end_of_tokens())) {
-        this.statements.push(this.statement());
+        this.code_block.push_statement(this.statement());
       }
 
-      var last_statement = this.statements[0];
-      for (var i = 1; i < this.statements.length; i++) {
-        var current_statement = this.statements[i];
-        last_statement.set_next_statement(current_statement);
-        last_statement = current_statement;
-      }
-      
-      return this.statements;
+      return this.code_block.statements;
     }
     catch (e) {
       console.log("exception: " + e);
@@ -30,7 +23,7 @@ var Parser = Class.extend({
 
   statement: function() {
     var lhs = this.tokenizer.next_token();
-    console.log("statement: lhs = <" + lhs.string + ">");
+    //console.log("statement: lhs = <" + lhs.string + ">");
     if (lhs.is_end_of_line()) {
       empty_statement_node = new EmptyStatementNode();
       empty_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
@@ -44,7 +37,17 @@ var Parser = Class.extend({
       if (!next.is_end_of_line())
         throw("extra token <" + next.string + "> after if expression");
     
-      return IfStatementNode(lhs, expr);
+      var if_statement_node = new IfStatementNode(lhs.string, expr, new CodeBlockNode);
+      while (true) {
+        var statement = this.statement();
+        if (statement instanceof EndStatementNode) 
+          break;
+        
+        if_statement_node.code_block.push_statement(statement); 
+      } 
+
+      if_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
+      return if_statement_node;
     }
 
     else if (lhs.is_equal_to("else")) {
@@ -52,6 +55,8 @@ var Parser = Class.extend({
      
       if (!next.is_end_of_line())
         throw("else not alone on line"); 
+
+      return new ElseStatementNode(lhs, expr);
     }
 
     else if (lhs.is_equal_to("while")) {
@@ -60,6 +65,7 @@ var Parser = Class.extend({
 
       if (!next.is_end_of_line())
         throw("extra token <" + next + ">  after while expression");
+      return new WhileStatementNode(lhs, expr);
     }
 
     else if (lhs.is_equal_to("end")) {
@@ -67,12 +73,14 @@ var Parser = Class.extend({
      
       if (!next.is_end_of_line())
         throw("end not alone on line"); 
+
+      return new EndStatementNode();
     }
 
     else {
       var next = this.tokenizer.next_token();
 
-      console.log("statement: next = <" + next.string + ">");
+      //console.log("statement: next = <" + next.string + ">");
       if (next.is_equal_to("=")) {
         return this.assignment_statement(lhs);
       }
@@ -105,7 +113,7 @@ var Parser = Class.extend({
 
   assignment_statement: function(lhs) {
     var rhs = this.tokenizer.next_token();
-    console.log("assignment_statement: rhs = <" + rhs.string + ">");
+    //console.log("assignment_statement: rhs = <" + rhs.string + ">");
     if (rhs.is_end_of_line()) {
       throw("no rhs for assignment");
     }
@@ -128,7 +136,7 @@ var Parser = Class.extend({
   expression: function() {
     var expr1 = this.variable_or_literal(this.tokenizer.next_token());
     var op = this.tokenizer.next_token();
-    console.log("expression: expr1 = <" + expr1 + ">, op = <" + op.string + ">");
+    //console.log("expression: expr1 = <" + expr1 + ">, op = <" + op.string + ">");
     if (op.is_end_of_line() || op.is_equal_to(")")) {
       var op = this.tokenizer.unnext_token();
       return expr1;
@@ -149,9 +157,9 @@ var Parser = Class.extend({
 
       return new FunctionNode(expr1.name, args);
     }
-    else if (op.is_one_of("-", "+", "*", "/")) {
+    else if (op.is_one_of(["-", "+", "*", "/", "==", "!="])) {
       var expr2 = this.variable_or_literal(this.tokenizer.next_token());
-      return new ExpressionNode(expr1, op, expr2);
+      return new ExpressionNode(expr1, op.string, expr2);
     }
     else {
       throw("invalid operation in expression: " + op);

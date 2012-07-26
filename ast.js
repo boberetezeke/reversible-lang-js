@@ -179,7 +179,9 @@ var FunctionNode = ASTNode.extend({
     var function_node = this;
     var primitive_func = vm.primitives[this.name];
 
-    if (!this.primitive && primitive_func) {
+    if (this.primitive) 
+      return this.primitive.operation(vm);
+    else if (!this.primitive && primitive_func) {
       this.primitive = primitive_func();
       this.primitive.args = this.args;
       this.primitive.line_number = this.line_number;

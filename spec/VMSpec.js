@@ -67,16 +67,16 @@ describe("VirtualMachine", function() {
 */
   
   it("should be able to execute a simple assignment", function() {
-    vm.start(parser.parse("a = 1\n"));
+    vm.start(parser.parse("a = 1"));
     vm.step();
-    expect(mock_program_ui.method_calls).toEqual([{method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}}]);
+    expect(mock_program_ui.method_calls).toEqual([{method_name: "move_instruction_pointer", args: {old_index: 0, new_index: -1}}]);
     expect(mock_memory_ui.method_calls).toEqual([{method_name: "new_value", args: {name: "a", value: new NumberClass("1")}}]);
   });
   
   it("should be able to execute a simple output", function() {
     vm.start(parser.parse("output ( 1 )\n"));
     vm.step();
-    expect(mock_program_ui.method_calls).toEqual([{method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}}]);
+    expect(mock_program_ui.method_calls).toEqual([{method_name: "move_instruction_pointer", args: {old_index: 0, new_index: -1}}]);
     expect(mock_output_ui.method_calls).toEqual([{method_name: "new_line", args: {new_line_index: 0, line: "1"}}]);
   });
 
@@ -88,7 +88,7 @@ describe("VirtualMachine", function() {
     expect(mock_memory_ui.method_calls.pop()).toEqual({method_name: "new_value", args: {name: "a", value: new NumberClass("1")}});
 
     vm.step();
-    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 1, new_index: 2}});
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 1, new_index: -1}});
     expect(mock_output_ui.method_calls.pop()).toEqual({method_name: "new_line", args: {new_line_index: 0, line: "1"}});
 
     expect(mock_program_ui.method_calls.length).toEqual(0);

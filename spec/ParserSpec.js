@@ -6,7 +6,7 @@ describe("Parser", function() {
   });
 
   it("should be able to parse an empty string", function() {
-    expect(parser.parse("")).toEqual([new EmptyStatementNode()]);
+    expect(parser.parse("")).toEqual([]);
   });
 
   it("should be able to parse an assignment with a number", function() {
@@ -63,7 +63,7 @@ describe("Parser", function() {
     expect(statements).toEqual(expect_statements);
   });
 
-  it("should parse and if statement and an end", function() {
+  it("should parse an if statement and an end", function() {
     var statements = parser.parse("if 1 == 1\nend");
     
     expect(statements).toEqual([new IfStatementNode(
@@ -71,6 +71,17 @@ describe("Parser", function() {
       new ExpressionNode(new NumberLiteralNode("1"), "==", new NumberLiteralNode("1"), 0),
       new CodeBlockNode(), 0)]);
   });
+
+/*
+  it("should parse an if statement with a function call and number expression and an end", function() {
+    var statements = parser.parse("if input ( \"enter number\" ) == 1\nend");
+    
+    expect(statements).toEqual([new IfStatementNode(
+      "if",
+      new ExpressionNode(new FunctionNode("input_string", ["enter number"], 0), "==", new NumberLiteralNode("1"), 0),
+      new CodeBlockNode(), 0)]);
+  });
+*/
 
   it("should parse and if statement an inner statement and an end", function() {
     var statements = parser.parse("if 1 == 1\na = 1\nend");
@@ -103,6 +114,8 @@ describe("Parser", function() {
 
     expect(statements).toEqual([if_statement_node]);
   });
+
+  // FIXME: test multiple else statements
 });
 
 

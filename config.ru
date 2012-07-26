@@ -1,4 +1,5 @@
 use Rack::Static, 
+  :urls => ["/inheritence.js"],
   :root => "/"
 
 run lambda { |env|

@@ -143,11 +143,12 @@ var VirtualMachine = Class.extend({
       if (!this.executors_available())
         return false;
     }
-    return true;
+
+    return (this.current_statement != null)
   },
 
   step: function() {
-    if (this.current_statement.next() == null)
+    if (this.current_statement == null)
       return false;
 
     var operation = this.current_statement.generate_operations(this)
@@ -165,6 +166,7 @@ var VirtualMachine = Class.extend({
   unstep: function() {
     if (this.undo_stack.length > 0)
       this.undo_stack.pop().undo(this);
+    return (this.undo_stack.length != 0);
   },
 
   create_executor_stack: function(operation_executor) {
@@ -198,7 +200,7 @@ var VirtualMachine = Class.extend({
   set_current_statement: function(next_statement) {
     old_statement = this.current_statement;
     this.current_statement = next_statement;
-    this.program_ui.move_instruction_pointer(old_statement.line_number, next_statement.line_number);
+    this.program_ui.move_instruction_pointer(old_statement ? old_statement.line_number : -1, next_statement ? next_statement.line_number : -1);
   },
 });
 

@@ -41,8 +41,15 @@ var ProgramUI = Class.extend({
   },
 
   move_instruction_pointer: function(old_index, new_index) {
-    $(this.pw.selector("ip-" + old_index)).hide();
-    $(this.pw.selector("ip-" + new_index)).show();
+    if (old_index != -1)
+      $(this.pw.selector("ip-" + old_index)).hide();
+    else
+      $(this.pw.selector("ip-last")).hide();
+
+    if (new_index != -1)
+      $(this.pw.selector("ip-" + new_index)).show();
+    else
+      $(this.pw.selector("ip-last")).show();
   }
 });
   
@@ -56,6 +63,33 @@ var ProgrammingWidget = Class.extend({
       this.define_edit();
     }, 
 
+  program_line: function(index, line, errored) {
+    if (errored)
+      td_style = "style=\"color: white; background-color: red;\"";
+    else
+      td_style = ""
+    return "<tr><td><span id=\"" + this.prefix + "-ip-" + index + "\">--&gt;</span></td><td id=\"statement-" + index + "\"" + td_style + ">" + line + "</td></tr>"
+  },
+
+  insert_program_lines: function(source, error_line) {
+    rows = "";
+    program_lines = source.split("\n");
+    for (var i = 0; i < program_lines.length; i++) {
+      rows = rows + this.program_line(i, program_lines[i], (error_line == i));
+    }
+    rows = rows + this.program_line("last", "&nbsp;", false);
+    console.log("rows = " + rows);
+    $(this.selector("program-table")).html(rows);
+
+    var start_line = 1;
+    if (error_line)
+      start_line = 0;
+    for (var i = start_line; i < program_lines.length; i++) {
+      $(this.selector("ip-") + i).hide();
+    }
+    $(this.selector("ip-last")).hide();
+  },
+
   parse: function() {
     var source = $(this.selector("editor-textarea")).val();
     this.parser = new Parser();
@@ -67,31 +101,33 @@ var ProgrammingWidget = Class.extend({
     }
     catch(e) {
       has_errored = true
+      match = /^(\d+): (.*)$/.exec(e);
       $(this.selector("error")).show();
-      $(this.selector("error")).html("ERROR: " + e);
+      $(this.selector("error")).html("ERROR: " + match[2]);
+      this.insert_program_lines(source, Number(match[1]));
+      $(this.selector("editor-section")).hide();
+      $(this.selector("program-section")).show();
+      $(this.selector("edit-button")).show();
+      $(this.selector("backward")).hide();
+      $(this.selector("forward")).hide();
+      $(this.selector("backward-disabled")).hide();
+      $(this.selector("forward-disabled")).hide();
     }
     if (!has_errored) {
       $(this.selector("error")).hide();
-      rows = "";
-      program_lines = source.split("\n");
-      for (i = 0; i < program_lines.length; i++) {
-        rows = rows + "<tr><td><span id=\"" + this.prefix + "-ip-" + i + "\">--&gt;</span></td><td id=\"statement-" + i + "\">" + program_lines[i] + "</td></tr>";
-      }
-      console.log("rows = " + rows);
+      this.insert_program_lines(source);
 
-      $(this.selector("program-table")).html(rows);
       $(this.selector("memory-table")).html("<tr><td class=\"memory-header-cell\">Name</td><td class=\"memory-header-cell\">Type</td><td class=\"memory-header-cell\">Value</td><td class=\"memory-header-cell\">Old Value</td></tr>");
       $(this.selector("output-table")).html("");
 
       $(this.selector("editor-section")).hide();
       $(this.selector("edit-button")).show();
       $(this.selector("program-section")).show();
-      $(this.selector("backward-disabled")).hide();
+      $(this.selector("forward")).show();
       $(this.selector("forward-disabled")).hide();
+      $(this.selector("backward")).hide();
+      $(this.selector("backward-disabled")).show();
 
-      for (i = 1; i < program_lines.length; i++) {
-        $(this.selector("ip-") + i).hide();
-      }
 
       this.virtual_machine.start(this.parser.code_block.statements);
     } 
@@ -106,6 +142,8 @@ var ProgrammingWidget = Class.extend({
       $(this.selector("forward")).show();
       $(this.selector("forward-disabled")).hide();
     }
+    $(this.selector("backward")).show();
+    $(this.selector("backward-disabled")).hide();
   },
 
   resume: function() {
@@ -120,7 +158,17 @@ var ProgrammingWidget = Class.extend({
   },
 
   unstep: function() {
-    this.virtual_machine.unstep();
+    if (!this.virtual_machine.unstep()) {
+      $(this.selector("backward")).hide();
+      $(this.selector("backward-disabled")).show();
+    }
+    else {
+      $(this.selector("backward")).show();
+      $(this.selector("backward-disabled")).hide();
+    }
+
+    $(this.selector("forward")).show();
+    $(this.selector("forward-disabled")).hide();
   },
 
   edit: function() {
@@ -184,7 +232,6 @@ var ProgrammingWidget = Class.extend({
           '<div class="actions">' + 
             '<a href="#" id="prefix-parse" class="button">start</a>' + 
           '</div>' + 
-          '<p id="error"></p>' + 
         '</div>' +
         '<div id="prefix-program-section">' + 
           '<table id="prefix-program-table" class="program-table"></table>' + 
@@ -194,6 +241,7 @@ var ProgrammingWidget = Class.extend({
             '<a href="#" id="prefix-forward" class="button">forward</a>' +
             '<span id="prefix-forward-disabled" class="button">forward</span>' +
           '</div>' + 
+          '<p id="prefix-error"></p>' + 
         '</div>' +
       '</div>' + 
       '<div class="memory">' +

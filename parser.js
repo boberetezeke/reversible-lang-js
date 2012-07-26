@@ -10,7 +10,9 @@ var Parser = Class.extend({
 
     try {
       while (!(this.tokenizer.end_of_tokens())) {
-        this.code_block.push_statement(this.statement());
+        var statement = this.statement();
+        if (!(statement instanceof EmptyStatementNode))
+          this.code_block.push_statement(statement);
       }
 
       return this.code_block.statements;
@@ -24,6 +26,7 @@ var Parser = Class.extend({
   statement: function() {
     var lhs = this.tokenizer.next_token();
     //console.log("statement: lhs = <" + lhs.string + ">");
+
     if (lhs.is_end_of_line()) {
       empty_statement_node = new EmptyStatementNode();
       empty_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
@@ -35,7 +38,7 @@ var Parser = Class.extend({
       var next = this.tokenizer.next_token();
 
       if (!next.is_end_of_line())
-        throw("extra token <" + next.string + "> after if expression");
+        throw(this.new_error(next, "extra token <" + next.string + "> after if expression"));
     
       var if_statement_node = new IfStatementNode(lhs.string, expr, new CodeBlockNode);
       var code_block = if_statement_node.code_block;
@@ -43,7 +46,7 @@ var Parser = Class.extend({
         var statement = this.statement();
         if (statement instanceof ElseStatementNode) {
           if (if_statement_node.else_code_block) {
-            throw "multiple else statements found for if";
+            throw(this.new_error(statement, "multiple else statements found for if"));
           }
           if_statement_node.else_code_block = new CodeBlockNode(if_statement_node);
           code_block = if_statement_node.else_code_block;
@@ -63,7 +66,7 @@ var Parser = Class.extend({
       var next = this.tokenizer.next_token();
      
       if (!next.is_end_of_line())
-        throw("else not alone on line"); 
+        throw(this.new_error(next, "else not alone on line")); 
 
       return new ElseStatementNode(lhs, expr);
     }
@@ -73,7 +76,7 @@ var Parser = Class.extend({
       var next = this.tokenizer.next_token();
 
       if (!next.is_end_of_line())
-        throw("extra token <" + next.string + "> after while expression");
+        throw(this.new_error(next, "extra token <" + next.string + "> after while expression"));
     
       var while_statement_node = new WhileStatementNode(expr, new CodeBlockNode);
       while (true) {
@@ -92,7 +95,7 @@ var Parser = Class.extend({
       var next = this.tokenizer.next_token();
      
       if (!next.is_end_of_line())
-        throw("end not alone on line"); 
+        throw(this.new_error(next, "end not alone on line")); 
 
       return new EndStatementNode();
     }
@@ -114,20 +117,20 @@ var Parser = Class.extend({
         }
 
         if (next.is_end_of_line())
-          throw("no closing paren for function invocation");
+          throw(this.new_error(next, "no closing paren for function invocation"));
 
         var closing_paren_token = next;
 
         next = this.tokenizer.next_token();
         if (!next.is_end_of_line())
-          throw("exteraneous tokens after function closing paren = '" + next + "'"); 
+          throw(this.new_error(next, "exteraneous tokens after function closing paren = '" + next + "'")); 
 
         var function_node = new FunctionNode(lhs.string, args);
         function_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, closing_paren_token.end_column); 
         return function_node;
       }
       else
-        throw("only assignment and function call statements allowed");
+        throw(this.new_error(next, "only assignment and function call statements allowed"));
     }
   },
 
@@ -135,7 +138,7 @@ var Parser = Class.extend({
     var rhs = this.tokenizer.next_token();
     //console.log("assignment_statement: rhs = <" + rhs.string + ">");
     if (rhs.is_end_of_line()) {
-      throw("no rhs for assignment");
+      throw(this.new_error(rhs, "no right hand side for assignment statement"));
     }
     else {
       this.tokenizer.unnext_token();
@@ -143,7 +146,7 @@ var Parser = Class.extend({
       newline = this.tokenizer.next_token()
 
       if (!newline.is_end_of_line()) {
-        throw("newline expected after assignment expression");
+        throw(this.new_error(newline, "newline expected after assignment expression"));
       }
       else {
         assignment_node = new AssignmentNode(lhs.string, rhs);
@@ -172,7 +175,7 @@ var Parser = Class.extend({
       }
 
       if (next.is_end_of_line()) {
-        throw("function missing closing ')'");
+        throw(this.new_error(next, "function missing closing ')'"));
       }
 
       return new FunctionNode(expr1.name, args);
@@ -182,13 +185,13 @@ var Parser = Class.extend({
       return new ExpressionNode(expr1, op.string, expr2);
     }
     else {
-      throw("invalid operation in expression: " + op);
+      throw(this.new_error(op, "invalid operation in expression: " + op));
     }
   },
 
   variable_or_literal: function(token) {
     if (token.is_end_of_line()) {
-      throw("end of line received when expecting variable or literal");
+      throw(this.new_error(token, "end of line received when expecting variable or literal"));
     }
 
     var node;
@@ -215,8 +218,12 @@ var Parser = Class.extend({
       return new StringLiteralNode(m[1]);
     }
     else {
-      throw("invalid literal: " + token.string);
+      throw(this.new_error(token, "invalid literal: " + token.string));
     }
+  },
+
+  new_error: function(token, message) {
+    return "" + token.line_number + ": " + message;
   }
 
 });

@@ -15,6 +15,7 @@ var OutputUI = Class.extend({
 var MemoryUI = Class.extend({
   init: function(programming_widget) {
     this.pw = programming_widget;
+    this.last_name = null
   },
 
   remove: function(name) {
@@ -22,15 +23,29 @@ var MemoryUI = Class.extend({
   },
 
   replace_value: function(name, value, old_value) {
-      $(this.pw.selector("memory-" + name)).replaceWith(this.dom_row(name, value.type_string, value.value(), old_value));
+    this.clear_last_change();
+    $(this.pw.selector("memory-" + name)).replaceWith(this.dom_row(name, value.type_string, value.value(), old_value.type_string + ": " + old_value.value()));
+    this.last_name = name;
   },
 
   new_value: function(name, value) {
-      $(this.pw.selector("memory-table")).append(this.dom_row(name, value.type_string, value.value(), ""));
+    this.clear_last_change();
+    $(this.pw.selector("memory-table")).append(this.dom_row(name, value.type_string, value.value(), "new"));
+    this.last_name = name;
+  },
+
+  clear_last_change: function() {
+    if (this.last_name) {
+      $(this.pw.selector("memory-" + this.last_name + "-old-value")).replaceWith(this.old_value_cell(this.last_name, ""));
+    }
+  },
+  
+  old_value_cell: function(name, old_value) {
+    return "<td class=\"memory-cell\" id=\"" + this.pw.prefix + "-memory-" + name + "-old-value\">" + old_value + "</td>";
   },
 
   dom_row: function(name, type_string, value, old_value) {
-    return "<tr id=\"" + this.pw.prefix + "-memory-" + name + "\"><td class=\"memory-cell\">" + name + "</td><td class=\"memory-cell\">" + type_string + "<td class=\"memory-cell\">" + value + "</td><td class=\"memory-cell\">" + old_value + "</td></tr>"
+    return "<tr id=\"" + this.pw.prefix + "-memory-" + name + "\"><td class=\"memory-cell\">" + name + "</td><td class=\"memory-cell\">" + type_string + "<td class=\"memory-cell\">" + value + "</td>" + this.old_value_cell(name, old_value) + "</tr>"
   }
 });
 

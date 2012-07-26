@@ -1,4 +1,4 @@
-simple-lang-js
+reversible-lang-js
 ==============
 
 A simple virtual machine for learning programming

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv = "Content-Type" content = "text/html; charset=utf-8"/>
+		<meta name = "viewport" content = "user-scalable=no"/> 
+		
+		<title>Simple HTML Slides</title>  <!-- Sets the title of your presentation on the browser tab -->
+		
+		<script src="http://slides.netfools.com/js/LAB.min.js"></script>
+
+		<script>
+			 $LAB
+	        .script("http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js").wait()
+	        .script("http://slides.netfools.com/js/sylvester.js")
+			.script("http://slides.netfools.com/js/jquery.animtrans.js").wait()		
+			.script("http://slides.netfools.com/js/purecssmatrix.js").wait()
+			.script("http://slides.netfools.com/js/md5.js")
+			.script("http://slides.netfools.com/js/jquery-impromptu.3.1.min.js")
+			.script("http://slides.netfools.com/js/jquery.zoomooz.js")
+			.script("http://slides.netfools.com/js/jquery.doubletap.js")
+			.script("http://slides.netfools.com/js/jquery.touchwipe.min.js")
+			.script("slide_control.1.2.js")
+
+			.script("inheritence.js")
+			.script("lexer.js")
+			.script("classes.js")
+			.script("operation.js")
+			.script("ast.js")
+			.script("parser.js")
+			.script("vm.js")
+			.script("pwidget.js")
+			.script("page.js");
+      //$(document).ready(function() {
+        //new ProgrammingWidget("#demo", "demo").activate();
+      //});
+		</script>
+		
+    <link rel="stylesheet" href="page.css">
+		<link rel="stylesheet" href="http://slides.netfools.com/style/zoomooz.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="http://slides.netfools.com/style/jqi.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="http://slides.netfools.com/style/slide-style.css" type="text/css" media="screen">
+		<link rel="stylesheet" href="http://slides.netfools.com/style/slide-themes.css" type="text/css" media="screen">
+		
+		
+		<style type="text/css">
+		
+	  		/* **************    CSS Classes that define slide background colors    **************** */
+
+			.no-fade  { background-image: none; } /* The no-fade class disables the background fade effect */
+				
+		     /* Change these or add your own. */	
+			 /* See http://en.wikipedia.org/wiki/List_of_colors */		  
+			
+			.red       {background-color: hsl(000,99%,60%)} /* hsl colors are easier to tweak than hex rgb */
+			.orange    {background-color: hsl(030,99%,60%)} /* The first number is the hue */
+			.yellow    {background-color: hsl(060,99%,60%)} /* The second number is the color saturation (intensity) */
+			.chartreuse{background-color: hsl(090,99%,60%)} /* The third number is the lightness */
+
+			.green     {background-color: hsl(120,99%,60%)}
+			.grass     {background-color: hsl(150,99%,60%)}
+			.cyan      {background-color: hsl(180,99%,60%)}
+			.azure     {background-color: hsl(210,99%,60%)}
+			.blue      {background-color: hsl(240,99%,60%)}
+			.purple    {background-color: hsl(270,99%,60%)}
+			.magenta   {background-color: hsl(300,99%,60%)}
+			.rose      {background-color: hsl(330,99%,60%)}
+			
+			.tangerine {background-color: hsl( 33,99%,50%)}
+			.peach	   {background-color: hsl( 39,99%,85%)}
+			.plum      {background-color: hsl(300,33%,70%)}
+			.pear      {background-color: hsl( 66,65%,54%)}	
+			
+			.taupe     {background-color: hsl( 25,32%,62%)}
+			.wheat     {background-color: hsl( 39,77%,70%)}	  			
+			.ecru      {background-color: hsl( 45,35%,63%)}   
+			.vanilla   {background-color: hsl( 48,75%,81%)}   
+			.pearl	   {background-color: hsl( 46,46%,89%)}   
+														
+		    .gray	   {background-color: hsl( 60,10%,59%)}
+			.ash       {background-color: hsl(135,03%,72%)}
+			.xanadu    {background-color: hsl(136,08%,60%)}
+			.slate     {background-color: hsl(210,13%,30%)}
+												
+			.brown	   {background-color: hsl( 30,29%,46%)}
+			.copper	   {background-color: hsl( 18,61%,63%)}
+			.gold	   {background-color: hsl( 50,65%,72%)}
+			.silver    {background-color: hsl(  0,12%,76%)}	
+			
+			.custom1   {background-color: hsl(058,35%,75%)}  /* Chosen to match the background in the video */
+	
+	  	</style>
+		
+	</head>
+	<body>
+		<noscript><h2>You really need to have Javascript enabled.</h2></noscript>
+		
+
+		<div id="container" class="theme03"> <!-- Set default theme by changing the class  
+											      Press keys 1 through 0 to change theme  
+			                                      Themes are defined in slide-themes.css   -->
+					
+			<!--*****************************************************************************************
+			*
+			*   To create a new slide make a <div> and give it the slide class and a color class.
+			*
+			*   Examples: 
+			*
+			* 		<div class="slide green" >  ..some slide content... </div>
+			*  
+			*       <div class="slide red no-fade>  ...content... </div>
+			*  
+			*       <div class="slide blue break>  ...content... </div>
+			*
+			*   Only colors defined as classes above will work, but you can define your own.
+			*
+			*   The no-fade class disables the background color fade effect.
+			*                        
+			*******************************************************************************************-->
+		 
+		 	
+				<!-- You can make "autosets" of slides from PDFs of presentations.
+				 
+					To specify a slide autoset, put a set of images files into a
+					web accessible directory. Name them something like name-01 ... name-XX,
+					create a div with:  class = "autoset"
+					id			= a unique name for the set of slides
+					data-source	= the location of the slides on the web
+					data-prefix	= the slide name prefix
+					data-type	= the file type
+					data-count	= the number of slides in the set
+					
+					You can have more than one autoset, and you can freely intermix regular 
+					slides and autosets.
+					
+					To create a directory of slides from a pdf (on a Mac)
+					1 - Open the pdf in Preview and choose File > Print
+					2 - Click on the PDF button (at the bottom) and choose Print to iPhoto
+					3 - Open iPhoto and select the album containing your slides
+					4 - Choose File > Export and change the File Name dropdown to "Sequential" 
+				-->
+				
+				
+				<!--  Uncomment this example and edit to suit.   Move it anywhere in the sequence
+						
+				<div class="autoset" id="set01" 
+					data-source	="./small" 
+					data-prefix = "slide-"
+					data-type	= ".jpg"
+					data-count	= "60"	
+				></div>
+		 			
+				-->
+		 
+		 
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide gray" >  
+			     	<h1>Reversible: A programming language for learning</h1>
+			    	<div class='slideBody'>
+				         <div class='autoBox highlight centerText'>
+				        	<h3>An Experiment In Learning How To Teach Programming<br>
+				        	And How to Write Your Own Language.</h3>
+				        </div>
+			        </div> 
+
+						<p class="centerText"> <i>Steve Tuckner @boberetezeke <a href="http://www.coderow.com"><img height="40px" width="78px" src="http://www.coderow.com/images/logo-lg.png"></a></i></p><br>
+				</div>
+				
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide taupe" >  
+			     	<h3>Another Programming Language</h3>
+			     	<h1>WAT?</h1>
+            <img src="images/wat_grande.jpg">
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide wheat">
+			     	<h1>Make It Visible</h1>
+			    	<div class='slideBody'>
+              <img src="images/mouse-trap.jpg">
+            </div>
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide ecru">
+			     	<h1>Make It Reversible</h1>
+			    	<div class='slideBody'>
+              <img src="images/undo-button.jpg">
+            </div>
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide gray">
+			     	<h1>Solve A Problems</h1>
+			    	<div class='slideBody'>
+				      <div class='autoBox highlight centerText'>
+				     	  <h3>Ask each person what they paid for their bill.<br>
+				      	At the end enter zero for the bill amount.<br>
+                Display the total bill amount, and the average amount</h3>
+              </div>
+            </div>
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide peach" >  <h1>Minimum Functionality</h1>
+			    	<div class='slideBody'>
+				      <div class='autoBox highlight'>
+              <ul class='biggerText'>
+                <li>Get Input</li>
+                <li>Write to memory</li>
+                <li>Read from memory</li>
+                <li>Have Types: Number, String, Boolean</li>
+                <li>Put Output</li>
+                <li>Make Decisions</li>
+                <li>Conditionally Loop</li>
+              </ul>
+              </div>
+            </div>
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide copper" >  
+            <h1>Design Decisions</h1>
+			    	<div class='slideBody'>
+				      <div class='autoBox highlight'>
+                <img src="images/pondering-man.jpg">
+              </div>
+            </div>
+          </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide gray" >  <h1>Syntax</h1>
+			    	<div class='slideBody'>
+				      <div class='autoBox highlight'>
+              <ul class="biggerText">
+                <li>Space Delimited Everything</li>
+                <li>One Statement Per Line: Assignment | FunctionCall </li>
+                <li>Assignment: identifier '=' Expression</li>
+                <li>Expression: (Literal | Identifier) operand (Literal | Identifier)</li>
+                <li>FunctionCall: Identifier '(' Argument* ')'
+                <li>If Statement:
+                  <ul>
+                      <li>'if' Expression</li>
+                      <li>Statements*</li>
+                      <li>'else' (else clause optional)</li>
+                      <li>Statements*</li>
+                      <li>'end'</li>
+                  </ul>
+                </li>
+                <li>While Statement:
+                  <ul>
+                      <li>'while' Expression</li>
+                      <li>Statements*</li>
+                      <li>'end'</li>
+                  </ul>
+                </li>
+                <li>Literal: \d+ | "[^"]*"</li>
+                <li>Identifier: [\w_]+
+              </ul>
+              </div>
+            </div>
+				  </div>
+
+kkk
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide gray" >  
+            <h1>A Solution</h1>
+			    	<div class='slideBody'>
+				      <div class='autoBox highlight'>
+<pre>
+sum = 0
+num_people = 0
+value = 1
+while value != 0
+  value = input_number ( "enter food amount" )
+  if value != 0
+    sum = sum + value
+    num_people = num_people + 1
+  end
+end
+output ( "total bill is" )
+output ( sum )
+output ( "the average bill is" )
+output ( sum / num_people )
+</pre>
+              </div>
+            </div>
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide gray" >  
+			     	<h1>Demo</h1>
+			    	<div class='slideBody'>
+              <div id="demo"></div>
+			      </div> 
+				  </div>
+
+			   <!--**************************  A Slide   ******************************-->
+		
+			    <div class="slide gray" >  
+			     	<h1>Thanks</h1>
+			    	<div class='slideBody'>
+				         <div class='autoBox highlight centerText'>
+				        	<h3>Steve Tuckner</h3>
+				        	<h4>Work E-mail - <a href="mailto:steve@coderow.com">steve@coderow.com</a><a href="http://www.coderow.com"><img height="40px" width="78px" src="http://www.coderow.com/images/logo-lg.png"></a></h4>
+				        	<h4>Personal E-mail - <a href="mailto:steve@stewdle.com">steve@stewdle.com</a></h4>
+				        	<h4><a href="http://www.twitter.com/boberetezeke">@boberetezeke</a></h4>
+				        	<h4><a href="http://steve.stewdle.com/blog">Blog</a></h4>
+				        </div>
+			        </div> 
+				</div>
+				
+		</div> <!-- end of slide #container -->
+	</body>
+</html>
+

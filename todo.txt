@@ -1,0 +1,35 @@
+ToDo list
+
+x handle last statement problem
+x be sure step backwards works
+* show indentation
+x show exceptions on parse in widget
+x show line where error happened
+* handle runtime errors (uninitialized var)
+* show value/type for old values
+* show changes only when step changes
+* show representation under memory
+
+Bugs
+
+Bug #2
+------
+
+won't parse
+
+while input ( "enter number" ) != 0
+i = 0
+end
+
+
+Fixed bugs
+
+Bug #1 (fixed)
+------
+i = 0
+while i < 3
+i = i + 1
+end
+b = 1
+
+doesn't update i going backwards in loop

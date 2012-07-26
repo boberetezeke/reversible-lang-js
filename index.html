@@ -13,8 +13,25 @@
     <script type="text/javascript" src="pwidget.js"></script>
     <script type="text/javascript" src="page.js"></script>
     <link rel="stylesheet" href="page.css">
+    <style>
+      .one-fifth {
+        width: 150px;
+        float: left;
+      }
+
+      .two-fifths {
+        width: 300px;
+        float: left;
+      }
+      h1 {
+        padding-bottom: 0px;
+        margin-bottom: 5px;
+      }
+    </style>
   </head>
   <body>
+    <h1>Reversible</h1>
+    <strong>A simple language for learning to program</strong>
     <script type="text/javascript">
       $(function() {
         new ProgrammingWidget("#assignment", "assignment").activate();
@@ -22,5 +39,74 @@
     </script>
     <div id="assignment">
     </div>
+    <div class="info">
+    <a href="reversible-slides.html">Slides</a>
+    <a href="https://github.com/boberetezeke/reversible-lang-js">Get the Code</a>
+    </div>
+    <div class="two-fifths">
+    <h1>Examples</h1>
+    <h3>Input a name and display it</h3>
+<pre>
+name = input_string ( "enter name" )
+output ( "your name is" )
+output ( name )
+</pre>
+
+    <h3>Get a list of food bills, total and average them</h3>
+<pre>
+sum = 0
+num_people = 0
+value = 1
+while value != 0
+  value = input_number ( "enter food amount" )
+  if value != 0
+    sum = sum + value
+    num_people = num_people + 1
+  end
+end
+output ( "total bill is" )
+output ( sum )
+output ( "the average bill is" )
+output ( sum / num_people )
+</pre>
+
+    </div>
+
+    <div class="two-fifths">
+    <h1>Syntax</h1>
+    <ul>
+      <li>Assignment: identifier '=' Expression</li>
+      <li>Expression: (Literal | Identifier) operand (Literal | Identifier)</li>
+      <li>FunctionCall: Identifier '(' Argument* ')'
+      <li>If Statement:
+        <ul>
+            <li>'if' Expression</li>
+            <li>Statements*</li>
+            <li>'else' (else clause optional)</li>
+            <li>Statements*</li>
+            <li>'end'</li>
+        </ul>
+      </li>
+      <li>While Statement:
+        <ul>
+            <li>'while' Expression</li>
+            <li>Statements*</li>
+            <li>'end'</li>
+        </ul>
+      </li>
+      <li>Literal: \d+ | "[^"]*"</li>
+      <li>Identifier: [\w_]+
+
+    </ul>
+    </div>
+    <div class="one-fifth">
+    <h1>Functions</h1>
+    <ul>
+      <li>Input a number - input_number ( "a string prompt" )</li>
+      <li>Input a string - input_string ( "a string prompt" )</li>
+      <li>Output a value - output ( literal_or_variable_name )</li>
+    </ul>
+    </div>
+
   </body>
 </html>

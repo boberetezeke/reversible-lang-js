@@ -4,7 +4,7 @@ var OutputUI = Class.extend({
   },
 
   new_line: function(new_line_index, line) {
-    $(this.pw.selector("output-table")).append("<tr><td id=\"" + this.pw.prefix + "-output-" + new_line_index + "\" class=\"output-cell\">" + line + "</td></tr>");
+    $(this.pw.selector("output-table")).append("<tr><td id=\"" + this.pw.prefix + "-output-" + new_line_index + "\" class=\"output-table-cell\">" + line + "</td></tr>");
   },
   
   remove_line: function(index) {
@@ -65,7 +65,7 @@ var ProgrammingWidget = Class.extend({
 
   program_line: function(index, line, errored) {
     if (errored)
-      td_style = "style=\"color: white; background-color: red;\"";
+      td_style = "class=\"program-errored-cell\"";
     else
       td_style = ""
     return "<tr><td><span id=\"" + this.prefix + "-ip-" + index + "\">--&gt;</span></td><td id=\"statement-" + index + "\"" + td_style + ">" + line + "</td></tr>"

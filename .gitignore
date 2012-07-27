@@ -1,3 +1,5 @@
 .backups
 **/.backups
 *.swp
+*.tar.gz
+slides.html

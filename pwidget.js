@@ -70,12 +70,32 @@ var ProgramUI = Class.extend({
   
 
 var ProgrammingWidget = Class.extend({
-  init: function(selector, prefix) {
+  init: function(selector, prefix, program, runatstart) {
       this.prefix = prefix;
       this.insert_html(selector, prefix);
       this.define_run();
       this.define_steps();
       this.define_edit();
+
+      if (program) {
+        $(this.selector("editor-textarea")).val(program);
+      }
+
+      var programming_widget = this;
+      $(this.selector("editor-textarea")).change(function() {
+        var textarea = $(programming_widget.selector("editor-textarea"));
+        console.log(textarea.val());
+
+        var encoded_program = encodeURI(textarea.val()).replace(/\&/, "%26").replace(/\?/, "%3F");
+        var url = window.location.protocol + 
+                  "//" + 
+                  window.location.host + 
+                  window.location.pathname + 
+                  "?program=" + encoded_program;
+                  
+        console.log("url = " + url);
+        $(programming_widget.selector("permalink")).attr("href", url);
+      });
     }, 
 
   program_line: function(index, line, errored) {
@@ -258,6 +278,7 @@ var ProgrammingWidget = Class.extend({
           '</div>' + 
           '<p id="prefix-error"></p>' + 
         '</div>' +
+        '<a href="#" id="prefix-permalink">Permalink</a>' +
       '</div>' + 
       '<div class="memory">' +
         '<p>Memory</p>' +

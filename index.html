@@ -34,8 +34,16 @@
     <h1>Reversible</h1>
     <strong>A simple language for learning to program</strong>
     <script type="text/javascript">
+      function $_GET(q,s) {
+          s = s ? s : window.location.search;
+          var re = new RegExp('&'+q+'(?:=([^&]*))?(?=&|$)','i');
+          return (s=s.replace(/^\?/,'&').match(re)) ? (typeof s[1] == 'undefined' ? '' : decodeURIComponent(s[1])) : undefined;
+      }
+
       $(function() {
-        new ProgrammingWidget("#assignment", "assignment").activate();
+        var program = $_GET("program");
+        var run_on_start = $_GET("runonstart");
+        var programming_widget = new ProgrammingWidget("#assignment", "assignment", program, run_on_start).activate();
       });
     </script>
     <div id="assignment">
@@ -43,6 +51,7 @@
     <div class="info">
     <a href="reversible-slides.html">Slides</a>
     <a href="https://github.com/boberetezeke/reversible-lang-js">Get the Code</a>
+    <a href="SpecRunner.html">Run the Tests</a>
     </div>
     <div class="two-fifths">
     <h1>Examples</h1>

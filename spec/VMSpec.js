@@ -65,7 +65,7 @@ describe("VirtualMachine", function() {
     expect(mock_memory_ui.method_calls).toEqual([{method_name: "new_value", args: {name: "a", value: new NumberClass("1")}}]);
   });
 */
-  
+
   it("should be able to execute a simple assignment", function() {
     vm.start(parser.parse("a = 1"));
     vm.step();
@@ -98,6 +98,18 @@ describe("VirtualMachine", function() {
 
   it("should be able to take an if", function() {
     vm.start(parser.parse("if 1 == 1\na = 1\nend\nb = 1\n"));
+
+    // should step into the if
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}});
+
+    // should step out of the if afterwards
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 1, new_index: 3}});
+  });
+
+  it("should be able to take an if and go past the if after with function on inside", function() {
+    vm.start(parser.parse("if 1 == 1\noutput ( 1 )\nend\nb = 1\n"));
 
     // should step into the if
     vm.step();

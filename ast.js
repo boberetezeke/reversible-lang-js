@@ -188,6 +188,8 @@ var FunctionNode = ASTNode.extend({
       this.primitive.start_column = this.start_column;
       this.primitive.end_column = this.end_column;
       this.primitive.next_node = this.next_node
+      this.primitive.from_code_block = this.from_code_block;
+      this.primitive.follow_next_node = this.follow_next_node;
       return this.primitive.operation(vm);
     }
     else {

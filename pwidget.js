@@ -103,7 +103,7 @@ var ProgrammingWidget = Class.extend({
       td_style = "class=\"program-errored-cell\"";
     else
       td_style = ""
-    return "<tr><td><span id=\"" + this.prefix + "-ip-" + index + "\">--&gt;</span></td><td id=\"statement-" + index + "\"" + td_style + ">" + line + "</td></tr>"
+    return "<tr><td><span id=\"" + this.prefix + "-ip-" + index + "\"><img src=\"images/green-arrow.jpg\"></span></td><td id=\"statement-" + index + "\"" + td_style + ">" + line + "</td></tr>"
   },
 
   insert_program_lines: function(source, error_line) {

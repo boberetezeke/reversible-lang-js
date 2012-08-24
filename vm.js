@@ -130,11 +130,15 @@ var VirtualMachine = Class.extend({
     return dom_id; 
   },
 
-  enable_step: function() {
+  can_step: function() {
     if (this.executor_stack.length > 0 && !this.executors_available()) 
       return false;
 
     return true;
+  },
+
+  is_done: function() {
+    return (this.current_statement == null)
   },
 
   resume: function() {

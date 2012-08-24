@@ -76,26 +76,17 @@ var ProgrammingWidget = Class.extend({
       this.define_run();
       this.define_steps();
       this.define_edit();
+      this.capture_editor_changes();
 
       if (program) {
         $(this.selector("editor-textarea")).val(program);
       }
 
-      var programming_widget = this;
-      $(this.selector("editor-textarea")).change(function() {
-        var textarea = $(programming_widget.selector("editor-textarea"));
-        console.log(textarea.val());
-
-        var encoded_program = encodeURI(textarea.val()).replace(/\&/, "%26").replace(/\?/, "%3F");
-        var url = window.location.protocol + 
-                  "//" + 
-                  window.location.host + 
-                  window.location.pathname + 
-                  "?program=" + encoded_program;
-                  
-        console.log("url = " + url);
-        $(programming_widget.selector("permalink")).attr("href", url);
-      });
+      if (runatstart) {
+        if (this.parse()) {
+          this.run(); 
+        }
+      }
     }, 
 
   program_line: function(index, line, errored) {
@@ -166,6 +157,26 @@ var ProgrammingWidget = Class.extend({
 
       this.virtual_machine.start(this.parser.code_block.statements);
     } 
+
+    return !has_errored;
+  },
+
+  run: function() {
+    var self = this;
+    $(".program").hide();
+    $(".memory").hide();
+    setTimeout(function(){self.run_step(self)}, 1000);
+  },
+
+  run_step: function(self) {
+    if (self.virtual_machine.is_done()) {
+      console.log("program done");
+      return;
+    }
+    else if (self.virtual_machine.can_step()) {
+      self.virtual_machine.step();
+    }
+    setTimeout(function(){self.run_step(self)}, 10);
   },
 
   step: function() {
@@ -240,8 +251,32 @@ var ProgrammingWidget = Class.extend({
       self.parse();
       return false;
     });
+
+    $(self.selector("run")).click(function() {
+      if (self.parse()) {
+        self.run();
+      }
+      return false;
+    });
   },
 
+  capture_editor_changes: function() {
+      var programming_widget = this;
+      $(this.selector("editor-textarea")).change(function() {
+        var textarea = $(programming_widget.selector("editor-textarea"));
+        console.log(textarea.val());
+
+        var encoded_program = encodeURI(textarea.val()).replace(/\&/, "%26").replace(/\?/, "%3F");
+        var url = window.location.protocol + 
+                  "//" + 
+                  window.location.host + 
+                  window.location.pathname + 
+                  "?program=" + encoded_program;
+                  
+        console.log("url = " + url);
+        $(programming_widget.selector("permalink")).attr("href", url);
+      });
+  },
 
   selector: function(selector_suffix) {
     return "#" + this.prefix + "-" + selector_suffix;
@@ -266,6 +301,7 @@ var ProgrammingWidget = Class.extend({
           '<textarea id="prefix-editor-textarea" class="editor"></textarea>' + 
           '<div class="actions">' + 
             '<a href="#" id="prefix-parse" class="button">start</a>' + 
+            '<a href="#" id="prefix-run" class="button">run</a>' + 
           '</div>' + 
         '</div>' +
         '<div id="prefix-program-section">' + 

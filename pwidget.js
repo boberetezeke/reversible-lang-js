@@ -76,6 +76,8 @@ var ProgrammingWidget = Class.extend({
       this.define_run();
       this.define_steps();
       this.define_edit();
+      this.define_continue();
+      this.define_stop();
       this.capture_editor_changes();
 
       if (program) {
@@ -136,6 +138,7 @@ var ProgrammingWidget = Class.extend({
       $(this.selector("edit-button")).show();
       $(this.selector("backward")).hide();
       $(this.selector("forward")).hide();
+      $(this.selector("continue")).hide();
       $(this.selector("backward-disabled")).hide();
       $(this.selector("forward-disabled")).hide();
     }
@@ -151,6 +154,7 @@ var ProgrammingWidget = Class.extend({
       $(this.selector("program-section")).show();
       $(this.selector("forward")).show();
       $(this.selector("forward-disabled")).hide();
+      $(this.selector("continue")).show();
       $(this.selector("backward")).hide();
       $(this.selector("backward-disabled")).show();
 
@@ -165,12 +169,13 @@ var ProgrammingWidget = Class.extend({
     var self = this;
     $(".program").hide();
     $(".memory").hide();
+    $(".output .actions").show();
     setTimeout(function(){self.run_step(self)}, 1000);
   },
 
   run_step: function(self) {
     if (self.virtual_machine.is_done()) {
-      console.log("program done");
+      $(this.selector("program-done")).show();
       return;
     }
     else if (self.virtual_machine.can_step()) {
@@ -245,9 +250,24 @@ var ProgrammingWidget = Class.extend({
     $(this.selector("editor-section")).show();
     $(this.selector("program-section")).hide();
     $(this.selector("edit-button")).hide();
+    $(".program").show();
+    $(".memory").show();
+    $(".output .actions").hide();
+    $(this.selector("program-done")).hide();
   },
 
+  stop: function() {
+    $(".program").show();
+    $(".memory").show();
+    $(".output .actions").hide();
+  },
   
+  continue: function() {
+    $(".program").hide();
+    $(".memory").hide();
+    $(".output .actions").show();
+  },
+
   define_steps: function() {
     var self = this;
     $(self.selector("forward")).click(function() {
@@ -265,6 +285,26 @@ var ProgrammingWidget = Class.extend({
     var self = this;
     $(self.selector("edit")).click(function() {
       self.edit();
+      return false;
+    });
+    $(self.selector("edit-from-output")).click(function() {
+      self.edit();
+      return false;
+    });
+  },
+
+  define_continue: function() {
+    var self = this;
+    $(self.selector("continue")).click(function() {
+      self.continue();
+      return false;
+    });
+  },
+
+  define_stop: function() {
+    var self = this;
+    $(self.selector("stop")).click(function() {
+      self.stop();
       return false;
     });
   },
@@ -324,7 +364,7 @@ var ProgrammingWidget = Class.extend({
         '<div id="prefix-editor-section" class="editor-section">' + 
           '<textarea id="prefix-editor-textarea" class="editor"></textarea>' + 
           '<div class="actions">' + 
-            '<a href="#" id="prefix-parse" class="button">start</a>' + 
+            '<a href="#" id="prefix-parse" class="button">step</a>' + 
             '<a href="#" id="prefix-run" class="button">run</a>' + 
           '</div>' + 
         '</div>' +
@@ -335,6 +375,7 @@ var ProgrammingWidget = Class.extend({
             '<span id="prefix-backward-disabled" class="button">backward</span>' +
             '<a href="#" id="prefix-forward" class="button">forward</a>' +
             '<span id="prefix-forward-disabled" class="button">forward</span>' +
+            '<a href="#" id="prefix-continue" class="button">run</a>' +
           '</div>' + 
           '<p id="prefix-error"></p>' + 
         '</div>' +
@@ -346,8 +387,14 @@ var ProgrammingWidget = Class.extend({
         '</table>' +
       '</div>' +
       '<div class="output">' +
-        '<p>Output</p>' +
+        '<p>Output' +
+          '<div class="actions" style="display:none;">' + 
+            '<a href="#" id="prefix-stop" class="button">stop</a>' + 
+            '<a href="#" id="prefix-edit-from-output" class="button">edit</a>' + 
+          '</div>' + 
+        '</p>' + 
         '<table id="prefix-output-table" class="output-table"></table>' + 
+        '<p id="prefix-program-done" style="display:none;">The program is done</p>' + 
       '</div>' +
       '<div style="clear: both;"></div>' + 
     '</div>';

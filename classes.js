@@ -2,6 +2,10 @@
 var SimpleClass = Class.extend({
   value: function() {
     return this.instance_value;
+  },
+
+  value_for_eval: function() {
+    return this.value();
   }
 });
 
@@ -24,6 +28,10 @@ var NumberClass = SimpleClass.extend({
 var StringClass = SimpleClass.extend({
   init: function(value) {
     this.instance_value = String(value);
+  },
+
+  value_for_eval: function() {
+    return "\"" + this.instance_value + "\""
   },
 
   type_string: "String"

@@ -429,7 +429,7 @@ var ExpressionNode = ASTNode.extend({
         var lhs_func = expression_node.lhs_operation.do(vm);
         var rhs_func = expression_node.rhs_operation.do(vm);
         return new Executor([lhs_func, rhs_func], function() {
-          var eval_str = lhs_func.value().value() + " " + expression_node.operation_string + " " + rhs_func.value().value();
+          var eval_str = lhs_func.value().value_for_eval() + " " + expression_node.operation_string + " " + rhs_func.value().value_for_eval();
           var value = eval(eval_str);
           if (typeof(value) == "number")
             return new NumberClass(value);

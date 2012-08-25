@@ -13,6 +13,14 @@ describe("Parser", function() {
     expect(parser.parse("a = 1")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
   });
 
+  it("should be able to parse an assignment with simple expression", function() {
+    expect(parser.parse("a = 1 + 1")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
+  });
+
+  it("should be able to parse an assignment with an expression with a number an operator and a function call", function() {
+    expect(parser.parse("a = 1 + f ( 3 )")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
+  });
+
   it("should be able to parse an assignment with a string", function() {
     expect(parser.parse("a = \"fred's life\"")).toEqual([new AssignmentNode("a", new StringLiteralNode("fred's life"))]);
   });

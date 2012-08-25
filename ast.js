@@ -1,3 +1,11 @@
+
+var ErrorInfo = Class.extend({
+  init: function(line_number, message) {
+    this.line_number = line_number;
+    this.message = message;
+  }
+});
+
 var ASTNode = Class.extend({
   
   init: function() {
@@ -198,7 +206,8 @@ var FunctionNode = ASTNode.extend({
           this.old_stack_frame_position = vm.current_stack_frame_position
         },
         function(vm) {
-          vm.create_new_stack_frame(function_node);
+          throw new ErrorInfo(function_node.line_number, "unknown function (" + function_node.name + ")");
+          //vm.create_new_stack_frame(function_node);
         },
         function(vm) {
           vm.restore_stack_frame(this.old_stack_frame_position);
@@ -521,7 +530,10 @@ var VariableNode = ASTNode.extend({
       function(vm) {
         return new Executor([], 
           function() {
-            return vm.memory.get(variable_node.name);
+            if (vm.memory.exists(variable_node.name))
+              return vm.memory.get(variable_node.name);
+            else
+              throw new ErrorInfo(variable_node.line_number, "unknown variable (" + variable_node.name + ")");
           }
         );
       },

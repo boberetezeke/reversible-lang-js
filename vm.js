@@ -141,6 +141,10 @@ var VirtualMachine = Class.extend({
     return (this.current_statement == null)
   },
 
+  runtime_error: function() {
+    return this.error_info ? this.error_info : null;
+  },
+
   resume: function() {
     // if resuming unfinished statement
     if (this.executor_stack.length > 0) {
@@ -156,9 +160,18 @@ var VirtualMachine = Class.extend({
       return false;
 
     var operation = this.current_statement.generate_operations(this)
+    var operation_executor;
 
+    
     operation.capture_current_state(this);
-    var operation_executor = operation.do(this)
+    try {
+      operation_executor = operation.do(this)
+    }
+    catch (e) {
+      this.error_info = e;
+      console.log("got error: " + e.message + " on line: " + e.line_number);
+      return false;
+    }
     this.undo_stack.push(operation);
 
     // order the executors from bottom to top
@@ -191,8 +204,18 @@ var VirtualMachine = Class.extend({
     // values are avaiable
     while (this.executor_stack.length > 0) {
       var executor = this.executor_stack.pop();
+      var executor_available;
 
-      if (!executor.available()) {
+      try {
+        executor_available = executor.available();
+      }
+      catch (e) {
+        this.error_info = e;
+        console.log("got error: " + e.message + " on line: " + e.line_number);
+        return false;
+      }
+      
+      if (!executor_available) {
         this.executor_stack.push(executor);
         return false;
       }

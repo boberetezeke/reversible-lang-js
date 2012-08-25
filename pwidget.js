@@ -94,7 +94,7 @@ var ProgrammingWidget = Class.extend({
       td_style = "class=\"program-errored-cell\"";
     else
       td_style = ""
-    return "<tr><td><span id=\"" + this.prefix + "-ip-" + index + "\"><img src=\"images/green-arrow.jpg\"></span></td><td id=\"statement-" + index + "\"" + td_style + ">" + line + "</td></tr>"
+    return "<tr><td><span id=\"" + this.prefix + "-ip-" + index + "\"><img src=\"images/green-arrow.jpg\"></span></td><td id=\"" + this.prefix + "-statement-" + index + "\"" + td_style + ">" + line + "</td></tr>"
   },
 
   insert_program_lines: function(source, error_line) {
@@ -175,21 +175,45 @@ var ProgrammingWidget = Class.extend({
     }
     else if (self.virtual_machine.can_step()) {
       self.virtual_machine.step();
+      var error_info = self.virtual_machine.runtime_error();
+      if (error_info) {
+        self.display_error(error_info);
+        return;
+      }
     }
     setTimeout(function(){self.run_step(self)}, 10);
   },
 
+  display_error: function(error_info) {
+      $(".program").show();
+      $(".memory").show();
+      $(this.selector("statement-" + error_info.line_number)).addClass("program-errored-cell");
+      $(this.selector("error")).show();
+      $(this.selector("error")).html("ERROR: " + error_info.message);
+
+      $(this.selector("backward")).show();
+      $(this.selector("backward-disabled")).hide();
+  },
+
   step: function() {
-    if (!this.virtual_machine.step()) {
-      $(this.selector("forward")).hide();
-      $(this.selector("forward-disabled")).show();
+    vm = this.virtual_machine;
+    vm.step();
+    var error_info = vm.runtime_error();
+    if (error_info) {
+      this.display_error(error_info);
     }
     else {
-      $(this.selector("forward")).show();
-      $(this.selector("forward-disabled")).hide();
+      if (vm.is_done() || !vm.can_step()) {
+        $(this.selector("forward")).hide();
+        $(this.selector("forward-disabled")).show();
+      }
+      else {
+        $(this.selector("forward")).show();
+        $(this.selector("forward-disabled")).hide();
+      }
+      $(this.selector("backward")).show();
+      $(this.selector("backward-disabled")).hide();
     }
-    $(this.selector("backward")).show();
-    $(this.selector("backward-disabled")).hide();
   },
 
   resume: function() {

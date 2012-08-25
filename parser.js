@@ -157,7 +157,19 @@ var Parser = Class.extend({
   },
 
   expression: function() {
-    var expr1 = this.variable_or_literal(this.tokenizer.next_token());
+    var next_token = this.tokenizer.next_token();
+    var expr1;
+    if (next_token.is_equal_to("(")) {
+      var expr1 = this.expression();
+      next_token = this.tokenizer.next_token();
+      if (!next_token.is_equal_to(")")) {
+          throw(this.new_error(next_token, "expression missing closing ')'"));
+      }
+    }
+    else {
+      expr1 = this.variable_or_literal(next_token);
+    }
+
     var op = this.tokenizer.next_token();
     //console.log("expression: expr1 = <" + expr1 + ">, op = <" + op.string + ">");
     if (op.is_end_of_line() || op.is_equal_to(")")) {
@@ -181,7 +193,7 @@ var Parser = Class.extend({
       return new FunctionNode(expr1.name, args);
     }
     else if (op.is_one_of(["-", "+", "*", "/", "==", "!=", "<", "<=", ">", ">=", "&&", "||"])) {
-      var expr2 = this.variable_or_literal(this.tokenizer.next_token());
+      var expr2 = this.expression();
       return new ExpressionNode(expr1, op.string, expr2);
     }
     else {

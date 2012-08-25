@@ -13,12 +13,24 @@ describe("Parser", function() {
     expect(parser.parse("a = 1")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
   });
 
+  it("should be able to parse an assignment with a parenthesized number", function() {
+    expect(parser.parse("a = ( 1 )")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
+  });
+
   it("should be able to parse an assignment with simple expression", function() {
-    expect(parser.parse("a = 1 + 1")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
+    expect(parser.parse("a = 1 + 1")).toEqual([new AssignmentNode("a", new ExpressionNode(new NumberLiteralNode("1"), "+", new NumberLiteralNode("1")))]);
+  });
+
+  it("should be able to parse an assignment with simple expression with two operators", function() {
+    expect(parser.parse("a = 1 + 1 + 1")).toEqual([new AssignmentNode("a", new ExpressionNode(new NumberLiteralNode("1"), "+", new ExpressionNode(new NumberLiteralNode("1"), "+", new NumberLiteralNode("1"))))]);
   });
 
   it("should be able to parse an assignment with an expression with a number an operator and a function call", function() {
-    expect(parser.parse("a = 1 + f ( 3 )")).toEqual([new AssignmentNode("a", new NumberLiteralNode("1"))]);
+    expect(parser.parse("a = 1 + f ( 3 )")).toEqual([new AssignmentNode("a", new ExpressionNode(new NumberLiteralNode("1"), "+", new FunctionNode("f", [new NumberLiteralNode("3")])))]);
+  });
+
+  it("should be able to parse an assignment with an expression with a number an operator and a function call", function() {
+    expect(parser.parse("a = ( height > 72 ) && ( weight < 100 )")).toEqual([new AssignmentNode("a", new ExpressionNode(new ExpressionNode(new VariableNode("height"), ">", new NumberLiteralNode("72")), "&&", new ExpressionNode(new VariableNode("weight"), "<", new NumberLiteralNode("100")) ))]);
   });
 
   it("should be able to parse an assignment with a string", function() {
@@ -79,7 +91,6 @@ describe("Parser", function() {
       new ExpressionNode(new NumberLiteralNode("1"), "==", new NumberLiteralNode("1"), 0),
       new CodeBlockNode(), 0)]);
   });
-
 /*
   it("should parse an if statement with a function call and number expression and an end", function() {
     var statements = parser.parse("if input ( \"enter number\" ) == 1\nend");

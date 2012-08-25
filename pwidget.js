@@ -335,7 +335,7 @@ var ProgrammingWidget = Class.extend({
                   "//" + 
                   window.location.host + 
                   window.location.pathname + 
-                  "?program=" + encoded_program;
+                  "?runonstart=true&program=" + encoded_program;
                   
         console.log("url = " + url);
         $(programming_widget.selector("permalink")).attr("href", url);

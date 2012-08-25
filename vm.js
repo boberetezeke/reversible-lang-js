@@ -114,9 +114,10 @@ var VirtualMachine = Class.extend({
     this.output = new Output(this.output_ui);
     virtual_machine = this;
     this.primitives = {
-      input_string: function() { return new InputStringPrimitiveNode(virtual_machine) },
-      input_number: function() { return new InputNumberPrimitiveNode(virtual_machine) },
-      output:       function() { return new OutputPrimitiveNode(virtual_machine) }
+      input_string:  function() { return new InputStringPrimitiveNode(virtual_machine) },
+      input_number:  function() { return new InputNumberPrimitiveNode(virtual_machine) },
+      output:        function() { return new OutputPrimitiveNode(virtual_machine) },
+      random_number: function() { return new RandPrimitiveNode(virtual_machine) }
     };
     this.statements = statements;
     this.current_statement = this.statements[0];

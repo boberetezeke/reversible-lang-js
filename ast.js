@@ -355,6 +355,47 @@ var OutputPrimitiveNode = FunctionNode.extend({
   }
 });
 
+var RandPrimitiveNode = FunctionNode.extend({
+  class_name: "RandPrimitiveNode",
+
+  operation: function(vm) {
+    var rand_primitive_node = this;
+    return new Operation(
+      function(vm) {
+      },
+      function(vm) {
+        var arg_funcs = [];
+        for (i = 0; i < rand_primitive_node.args.length; i++) {
+          arg = rand_primitive_node.args[i];
+          arg_funcs.push(arg.generate_operations(vm).do(vm));
+        }
+
+        return new Executor(arg_funcs, function() {
+          if (arg_funcs.length != 1) 
+            throw new ErrorInfo(rand_primitive_node.line_number, "rand expects number argument, that indicates the high value wanted");
+          //low = arg_funcs[0].value();
+          low_value = 0
+          high = arg_funcs[0].value();
+
+          //if (!(low instanceof NumberClass))
+            //throw new ErrorInfo(rand_primitive_node.line_number, "rand expects the low argument to be a number");
+
+          if (!(high instanceof NumberClass))
+            throw new ErrorInfo(rand_primitive_node.line_number, "rand expects a number argument");
+
+          //low_value = low.value();
+          high_value = high.value();
+
+          return new NumberClass(Math.floor(Math.random() * (high_value - low_value)) + low_value);
+        });
+      },
+      function(vm) {
+      }
+    );  
+  }
+});
+
+
 var AssignmentNode = ASTNode.extend({
   init: function(lhs, rhs, line_number) {
     this._super();

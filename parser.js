@@ -180,7 +180,7 @@ var Parser = Class.extend({
 
       return new FunctionNode(expr1.name, args);
     }
-    else if (op.is_one_of(["-", "+", "*", "/", "==", "!=", "<", "<=", ">", ">="])) {
+    else if (op.is_one_of(["-", "+", "*", "/", "==", "!=", "<", "<=", ">", ">=", "&&", "||"])) {
       var expr2 = this.variable_or_literal(this.tokenizer.next_token());
       return new ExpressionNode(expr1, op.string, expr2);
     }

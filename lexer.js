@@ -39,20 +39,14 @@ var Lexer = Class.extend({
     for (index = 0; index < lines.length; index++) {
       line = lines[index];
       strings = [];
-      
-      // replace single spaces with _'s
-      line = line.replace(/"[^"]*"/g, function(match) { return match.replace(/ /g, "_") });
+      var regex = /^(\s+)|((["'])(?:(?=(\\?))\4.)*?\3)|([A-Za-z_][\w_]*)|(\d+(\.\d+)?|\.\d+)|([/()+*/%!<>&|=-]+)|(\S+)/
 
-      words = line.split(/\s+/)
-      var word_index;
-      for (word_index = 0; word_index < words.length; word_index++) {
-        var word = words[word_index];
-        if (word != "") {
-          if (/^"/.exec(word))
-            // if it is a string token, put the underscores back to spaces
-            word = word.replace(/_/g, " ");
-          this.tokens.push(new Token(word, index, 0, 0));
+      while (line.length > 0) {
+        var match = regex.exec(line);
+        if (!match[1]) {
+          this.tokens.push(new Token(match[0], index, 0, 0));
         }
+        line = line.slice(match[0].length)
       }
       this.tokens.push(new Token("\n", index, 0, 0));
     }

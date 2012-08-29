@@ -223,11 +223,13 @@ var Parser = Class.extend({
   },
 
   literal: function(token) {
-    if (/^[0-9]+$/.exec(token.string)) {
+    if (/^[0-9]/.exec(token.string)) {
       return new NumberLiteralNode(token.string);
     }
-    else if (m = /^"([^"]*)"$/.exec(token.string)) {
-      return new StringLiteralNode(m[1]);
+    else if (m = /(["'])((?:(?=(\\?))\3.)*?)\1/.exec(token.string)) {
+      var string = m[2];
+      var translated_string = string.replace(/\\"/, "\"").replace(/\\\\/, "\\");
+      return new StringLiteralNode(translated_string);
     }
     else {
       throw(this.new_error(token, "invalid literal: " + token.string));

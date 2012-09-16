@@ -91,6 +91,7 @@ describe("Parser", function() {
       new ExpressionNode(new NumberLiteralNode("1"), "==", new NumberLiteralNode("1"), 0),
       new CodeBlockNode(), 0)]);
   });
+
 /*
   it("should parse an if statement with a function call and number expression and an end", function() {
     var statements = parser.parse("if input ( \"enter number\" ) == 1\nend");
@@ -101,6 +102,7 @@ describe("Parser", function() {
       new CodeBlockNode(), 0)]);
   });
 */
+
 
   it("should parse and if statement an inner statement and an end", function() {
     var statements = parser.parse("if 1 == 1\na = 1\nend");

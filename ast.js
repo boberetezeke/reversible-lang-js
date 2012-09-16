@@ -79,8 +79,12 @@ var IfStatementNode = ASTNode.extend({
           else {
             if (if_statement_node.else_code_block && if_statement_node.else_code_block.statements.length > 0)
               vm.set_current_statement(if_statement_node.else_code_block.statements[0]);
-            else
-              vm.set_current_statement(if_statement_node.next_node);
+            else {
+              var next_node = if_statement_node.next_node;
+              while (next_node.next_node) 
+                next_node = next_node.next_node;
+              vm.set_current_statement(next_node);
+            }
           }
         });
       },

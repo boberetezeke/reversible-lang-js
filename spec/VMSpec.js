@@ -127,7 +127,18 @@ describe("VirtualMachine", function() {
     vm.step();
     expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 3}});
   });
-  
+
+  it("should be able to skip an inner if to past the outer if", function() {
+    vm.start(parser.parse("if 1 == 1\nif 1 == 0\na = 1\nend\nend\nb = 1\n"));
+
+    // should go into if
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 0, new_index: 1}});
+    // should skip over inner if to statement after outer if
+    vm.step();
+    expect(mock_program_ui.method_calls.pop()).toEqual({method_name: "move_instruction_pointer", args: {old_index: 1, new_index: 5}});
+  });
+
   // FIXME: add in test for empty if code block
   // FIXME: add in test for empty else code block
 

@@ -129,7 +129,7 @@ describe("VirtualMachine", function() {
   });
 
   it("should be able to skip an inner if to past the outer if", function() {
-    vm.start(parser.parse("if 1 == 1\nif 1 == 0\na = 1\nend\nend\nb = 1\n"));
+    vm.start(parser.parse("if 1 == 1\nif 1 == 0\na = 1\nend\nend\nb = 1\nc = 1\n"));
 
     // should go into if
     vm.step();

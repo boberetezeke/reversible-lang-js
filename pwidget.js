@@ -330,7 +330,7 @@ var ProgrammingWidget = Class.extend({
         var textarea = $(programming_widget.selector("editor-textarea"));
         console.log(textarea.val());
 
-        var encoded_program = encodeURI(textarea.val()).replace(/\&/, "%26").replace(/\?/, "%3F");
+        var encoded_program = encodeURI(textarea.val()).replace(/\&/g, "%26").replace(/\?/g, "%3F");
         var url = window.location.protocol + 
                   "//" + 
                   window.location.host + 

@@ -34,6 +34,7 @@ var Parser = Class.extend({
     }
 
     else if (lhs.is_equal_to("if") || lhs.is_equal_to("elsif")) {
+      var if_statement_token = lhs;
       var expr = this.expression();
       var next = this.tokenizer.next_token();
 
@@ -43,19 +44,25 @@ var Parser = Class.extend({
       var if_statement_node = new IfStatementNode(lhs.string, expr, new CodeBlockNode);
       var code_block = if_statement_node.code_block;
       while (true) {
-        var statement = this.statement();
-        if (statement instanceof ElseStatementNode) {
-          if (if_statement_node.else_code_block) {
-            throw(this.new_error(statement, "multiple else statements found for if"));
-          }
-          if_statement_node.else_code_block = new CodeBlockNode(if_statement_node);
-          code_block = if_statement_node.else_code_block;
-          continue;
+        if (this.tokenizer.end_of_tokens()) {
+          throw(this.new_error(if_statement_token, "no closing end for if found"));
         }
-        else if (statement instanceof EndStatementNode) 
-          break;
-        
-        code_block.push_statement(statement); 
+
+        var statement = this.statement();
+        if (!(statement instanceof EmptyStatementNode)) {
+          if (statement instanceof ElseStatementNode) {
+            if (if_statement_node.else_code_block) {
+              throw(this.new_error(statement, "multiple else statements found for if"));
+            }
+            if_statement_node.else_code_block = new CodeBlockNode(if_statement_node);
+            code_block = if_statement_node.else_code_block;
+            continue;
+          }
+          else if (statement instanceof EndStatementNode) 
+            break;
+
+          code_block.push_statement(statement); 
+        }
       } 
 
       if_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);
@@ -72,6 +79,7 @@ var Parser = Class.extend({
     }
 
     else if (lhs.is_equal_to("while")) {
+      var while_statement_token = lhs;
       var expr = this.expression();
       var next = this.tokenizer.next_token();
 
@@ -80,11 +88,17 @@ var Parser = Class.extend({
     
       var while_statement_node = new WhileStatementNode(expr, new CodeBlockNode);
       while (true) {
+        if (this.tokenizer.end_of_tokens()) {
+          throw(this.new_error(while_statement_token, "no closing end for while found"));
+        }
+
         var statement = this.statement();
-        if (statement instanceof EndStatementNode) 
-          break;
-        
-        while_statement_node.code_block.push_statement(statement); 
+        if (!(statement instanceof EmptyStatementNode)) {
+          if (statement instanceof EndStatementNode) 
+            break;
+          
+          while_statement_node.code_block.push_statement(statement); 
+        }
       } 
 
       while_statement_node.set_line_number_and_columns(lhs.line_number, lhs.start_column, lhs.end_column);

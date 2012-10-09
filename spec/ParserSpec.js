@@ -136,6 +136,34 @@ describe("Parser", function() {
     expect(statements).toEqual([if_statement_node]);
   });
 
+  // error cases
+
+  it("should error on a missing end for if", function() {
+    try {
+      var statements = parser.parse("if 1 == 1\n")
+    }
+    catch(e) {
+      expect(e).toEqual("0: no closing end for if found");
+    }
+  });
+
+  it("should error on a missing end for if/else", function() {
+    try {
+      var statements = parser.parse("a = 0\nif 1 == 1\na = 1\nelse\na = 2")
+    }
+    catch(e) {
+      expect(e).toEqual("1: no closing end for if found");
+    }
+  });
+
+  it("should error on a missing end for while", function() {
+    try {
+      var statements = parser.parse("while 1 == 1\n")
+    }
+    catch(e) {
+      expect(e).toEqual("0: no closing end for while found");
+    }
+  });
   // FIXME: test multiple else statements
 });
 

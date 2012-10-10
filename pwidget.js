@@ -73,6 +73,8 @@ var ProgrammingWidget = Class.extend({
   init: function(selector, prefix, program, runatstart) {
       this.prefix = prefix;
       this.insert_html(selector, prefix);
+      this.define_max();
+      this.define_min();
       this.define_run();
       this.define_steps();
       this.define_edit();
@@ -106,7 +108,7 @@ var ProgrammingWidget = Class.extend({
       rows = rows + this.program_line(i, program_lines[i], (error_line == i));
     }
     rows = rows + this.program_line("last", "&nbsp;", false);
-    console.log("rows = " + rows);
+    //console.log("rows = " + rows);
     $(this.selector("program-table")).html(rows);
 
     var start_line = 1;
@@ -169,6 +171,7 @@ var ProgrammingWidget = Class.extend({
     var self = this;
     $(".program").hide();
     $(".memory").hide();
+    $(self.selector("output")).addClass("max-width");
     $(".output .actions").show();
     setTimeout(function(){self.run_step(self)}, 1000);
   },
@@ -253,6 +256,7 @@ var ProgrammingWidget = Class.extend({
     $(".program").show();
     $(".memory").show();
     $(".output .actions").hide();
+    $(this.selector("output")).removeClass("max-width");
     $(this.selector("program-done")).hide();
   },
 
@@ -260,6 +264,7 @@ var ProgrammingWidget = Class.extend({
     $(".program").show();
     $(".memory").show();
     $(".output .actions").hide();
+    $(this.selector("output")).removeClass("max-width");
   },
   
   continue: function() {
@@ -306,6 +311,27 @@ var ProgrammingWidget = Class.extend({
     $(self.selector("stop")).click(function() {
       self.stop();
       return false;
+    });
+  },
+
+  define_min: function() {
+    var self = this;
+    $(self.selector("minimize")).hide();
+    $(self.selector("minimize")).click(function() {
+      $(self.selector("program")).removeClass("max-width");
+      $(self.selector("minimize")).hide();
+      $(self.selector("maximize")).show();
+    });
+  },
+
+  define_max: function() {
+    var self = this;
+    $(self.selector("maximize")).show();
+    $(self.selector("maximize")).click(function() {
+      $(self.selector("program")).addClass("max-width");
+      $(self.selector("maximize")).hide();
+      $(self.selector("minimize")).show();
+      $(self.selector("editor-textarea")).addClass("max-width");
     });
   },
 
@@ -359,7 +385,9 @@ var ProgrammingWidget = Class.extend({
     '<div class="programming-widget">' + 
       '<div id="prefix-program" class="program">' + 
         '<p>Program' + 
-          '<span id="prefix-edit-button">&nbsp;<a href="#" id="prefix-edit" class="button">edit</a></span>' +
+            '<span id="prefix-edit-button">&nbsp;<a href="#" id="prefix-edit" class="button">edit</a></span>' +
+            '<span id="prefix-maximize-button">&nbsp;<a href="#" id="prefix-maximize" class="button">max</a></span>' + 
+            '<span id="prefix-minimize-button">&nbsp;<a href="#" id="prefix-minimize" class="button">min</a></span>' + 
         '</p>' + 
         '<div id="prefix-editor-section" class="editor-section">' + 
           '<textarea id="prefix-editor-textarea" class="editor"></textarea>' + 
@@ -381,12 +409,12 @@ var ProgrammingWidget = Class.extend({
         '</div>' +
         '<a href="#" id="prefix-permalink">Permalink</a>' +
       '</div>' + 
-      '<div class="memory">' +
+      '<div id="prefix-memory" class="memory">' +
         '<p>Memory</p>' +
         '<table id="prefix-memory-table" class="memory-table">' +
         '</table>' +
       '</div>' +
-      '<div class="output">' +
+      '<div id="prefix-output" class="output">' +
         '<p>Output' +
           '<div class="actions" style="display:none;">' + 
             '<a href="#" id="prefix-stop" class="button">stop</a>' + 

@@ -210,7 +210,7 @@ var ProgrammingWidget = Class.extend({
   },
 
   update_backward: function() {
-      if (vm.can_unstep()) {
+      if (this.virtual_machine.can_unstep()) {
         $(this.selector("backward")).show();
         $(this.selector("backward-disabled")).hide();
       }
@@ -221,7 +221,7 @@ var ProgrammingWidget = Class.extend({
   },
 
   update_forward: function() {
-      if (vm.can_step()) {
+      if (this.virtual_machine.can_step()) {
         $(this.selector("forward")).show();
         $(this.selector("forward-disabled")).hide();
       }
@@ -276,6 +276,8 @@ var ProgrammingWidget = Class.extend({
     $(".program").hide();
     $(".memory").hide();
     $(".output .actions").show();
+    self = this;
+    setTimeout(function(){self.run_step(self)}, 1000);
   },
 
   define_steps: function() {

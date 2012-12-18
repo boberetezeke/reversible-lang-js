@@ -199,8 +199,36 @@ var ProgrammingWidget = Class.extend({
       $(this.selector("error")).show();
       $(this.selector("error")).html("ERROR: " + error_info.message);
 
+      this.update_steppers();
       $(this.selector("backward")).show();
       $(this.selector("backward-disabled")).hide();
+  },
+
+  update_steppers: function() {
+    this.update_backward();
+    this.update_forward();
+  },
+
+  update_backward: function() {
+      if (vm.can_unstep()) {
+        $(this.selector("backward")).show();
+        $(this.selector("backward-disabled")).hide();
+      }
+      else {
+        $(this.selector("backward")).hide();
+        $(this.selector("backward-disabled")).show();
+      }
+  },
+
+  update_forward: function() {
+      if (vm.can_step()) {
+        $(this.selector("forward")).show();
+        $(this.selector("forward-disabled")).hide();
+      }
+      else {
+        $(this.selector("forward")).hide();
+        $(this.selector("forward-disabled")).show();
+      }
   },
 
   step: function() {
@@ -211,42 +239,18 @@ var ProgrammingWidget = Class.extend({
       this.display_error(error_info);
     }
     else {
-      if (vm.is_done() || !vm.can_step()) {
-        $(this.selector("forward")).hide();
-        $(this.selector("forward-disabled")).show();
-      }
-      else {
-        $(this.selector("forward")).show();
-        $(this.selector("forward-disabled")).hide();
-      }
-      $(this.selector("backward")).show();
-      $(this.selector("backward-disabled")).hide();
+      this.update_steppers();
     }
   },
 
   resume: function() {
-    if (!this.virtual_machine.resume()) {
-      $(this.selector("forward")).hide();
-      $(this.selector("forward-disabled")).show();
-    }
-    else {
-      $(this.selector("forward")).show();
-      $(this.selector("forward-disabled")).hide();
-    }
+    this.virtual_machine.resume();
+    this.update_steppers();
   },
 
   unstep: function() {
-    if (!this.virtual_machine.unstep()) {
-      $(this.selector("backward")).hide();
-      $(this.selector("backward-disabled")).show();
-    }
-    else {
-      $(this.selector("backward")).show();
-      $(this.selector("backward-disabled")).hide();
-    }
-
-    $(this.selector("forward")).show();
-    $(this.selector("forward-disabled")).hide();
+    this.virtual_machine.unstep();
+    this.update_steppers();
   },
 
   edit: function() {
@@ -265,6 +269,7 @@ var ProgrammingWidget = Class.extend({
     $(".memory").show();
     $(".output .actions").hide();
     $(this.selector("output")).removeClass("max-width");
+    this.update_steppers();
   },
   
   continue: function() {

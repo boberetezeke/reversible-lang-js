@@ -135,7 +135,14 @@ var VirtualMachine = Class.extend({
     if (this.executor_stack.length > 0 && !this.executors_available()) 
       return false;
 
+    if (this.current_statement == null)
+      return false;
+
     return true;
+  },
+
+  can_unstep: function() {
+    return (this.undo_stack.length > 0);
   },
 
   is_done: function() {

@@ -189,8 +189,12 @@ var VirtualMachine = Class.extend({
   },
 
   unstep: function() {
-    if (this.undo_stack.length > 0)
+    if (this.undo_stack.length > 0) {
       this.undo_stack.pop().undo(this);
+      // FIXME: this is probably not right as partially executed statements
+      //        need to be undone as well (if they have side effects).
+      this.executor_stack = [];
+    }
     return (this.undo_stack.length != 0);
   },
 

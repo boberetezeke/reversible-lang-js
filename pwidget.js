@@ -173,10 +173,11 @@ var ProgrammingWidget = Class.extend({
     $(".memory").hide();
     $(self.selector("output")).addClass("max-width");
     $(".output .actions").show();
-    setTimeout(function(){self.run_step(self)}, 1000);
+    self.run_loop_id = setTimeout(function(){self.run_step()}, 1000);
   },
 
-  run_step: function(self) {
+  run_step: function() {
+    self = this;
     if (self.virtual_machine.is_done()) {
       $(this.selector("program-done")).show();
       return;
@@ -189,7 +190,7 @@ var ProgrammingWidget = Class.extend({
         return;
       }
     }
-    setTimeout(function(){self.run_step(self)}, 10);
+    self.run_loop_id = setTimeout(function(){self.run_step()}, 10);
   },
 
   display_error: function(error_info) {
@@ -270,6 +271,7 @@ var ProgrammingWidget = Class.extend({
     $(".output .actions").hide();
     $(this.selector("output")).removeClass("max-width");
     this.update_steppers();
+    window.clearTimeout(this.run_loop_id);
   },
   
   continue: function() {
@@ -277,7 +279,7 @@ var ProgrammingWidget = Class.extend({
     $(".memory").hide();
     $(".output .actions").show();
     self = this;
-    setTimeout(function(){self.run_step(self)}, 1000);
+    self.run_loop_id = window.setTimeout(function(){self.run_step()}, 1000);
   },
 
   define_steps: function() {
